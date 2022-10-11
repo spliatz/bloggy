@@ -1,19 +1,19 @@
 package repository
 
 import (
-	"github.com/jackc/pgx"
+    "github.com/jackc/pgx"
 )
 
 type Repository struct {
-	User
+    User
 }
 
 type User interface {
-	Create(username, name, surname, email, password string) error
+    Create(username, name, surname, email, password string) error
 }
 
 func NewRepository(db *pgx.Conn) *Repository {
-	return &Repository{
-		User: newUserRepository(db),
-	}
+    return &Repository{
+        User: newUserRepository(db),
+    }
 }

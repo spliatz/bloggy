@@ -1,8 +1,9 @@
 package handler
 
 import (
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/services"
 	"github.com/gin-gonic/gin"
+
+	"github.com/Intellect-Bloggy/bloggy-backend/internal/services"
 )
 
 type Handlers struct {
