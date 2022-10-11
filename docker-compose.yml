@@ -1,0 +1,33 @@
+version: '3.8'
+
+services:
+  bloggy-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - 8000:8000
+    depends_on:
+       db:
+         condition: service_healthy
+    environment:
+      - PORT=8000
+      - POSTGRES_LOCAL_PORT=5432
+      - POSTGRES_HOST=db
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=postgres
+      - POSTGRES_PASSWORD=docker
+    restart: 'no'
+  db:
+    restart: always
+    image: postgres:alpine
+    volumes:
+      - ./.database/postgres/data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=docker
+    ports:
+      - 5436:5432
+    healthcheck:
+      test: "pg_isready --username=postgres && psql --username=postgres --list"
+      timeout: 10s
+      retries: 20
