@@ -1,8 +1,9 @@
 package services
 
 import (
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
+    "errors"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
 )
 
 type UserService struct {
@@ -15,18 +16,15 @@ func newUserService(repos *repository.Repository) *UserService {
     }
 }
 
-func (s *UserService) Create(u structs.User) (*structs.User, error) {
-    err := s.repos.User.Create(u.Username, u.Name, u.Surname, u.Email, u.Password)
-    if err != nil {
-        return nil, err
+func (s *UserService) Create(input *structs.UserCreateInput) (*structs.User, error) {
+
+    if input.Username == nil {
+        return nil, errors.New("поле username обязательно")
     }
 
-    user := &structs.User{
-        Username: u.Username,
-        Name:     u.Name,
-        Surname:  u.Surname,
-        Email:    u.Email,
-        Password: u.Password,
+    user, err := s.repos.User.Create(input)
+    if err != nil {
+        return nil, err
     }
 
     return user, nil

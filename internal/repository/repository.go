@@ -1,7 +1,14 @@
 package repository
 
 import (
-    "github.com/jackc/pgx"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
+    "github.com/jackc/pgx/v5"
+)
+
+const (
+    usersTable = "users"
+    authTable  = "auth"
+    postsTable = "posts"
 )
 
 type Repository struct {
@@ -9,7 +16,7 @@ type Repository struct {
 }
 
 type User interface {
-    Create(username, name, surname, email, password string) error
+    Create(input *structs.UserCreateInput) (*structs.User, error)
 }
 
 func NewRepository(db *pgx.Conn) *Repository {

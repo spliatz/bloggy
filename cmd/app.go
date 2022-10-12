@@ -1,15 +1,15 @@
 package main
 
 import (
-	"os"
-	"strconv"
+    "os"
+    "strconv"
 
-	"github.com/sirupsen/logrus"
+    "github.com/sirupsen/logrus"
 
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/handler"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/server"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/services"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/handler"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/server"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
 )
 
 func main() {
@@ -26,6 +26,7 @@ func main() {
         Username: os.Getenv("POSTGRES_USER"),
         DBName:   os.Getenv("POSTGRES_DB"),
         Password: os.Getenv("POSTGRES_PASSWORD"),
+        SSLMode:  os.Getenv("POSTGRES_SSLMode"),
     })
 
     if err != nil {

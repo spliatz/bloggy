@@ -2,8 +2,9 @@ package repository
 
 import (
     "context"
- 
-    "github.com/jackc/pgx"
+    "fmt"
+
+    "github.com/jackc/pgx/v5"
 )
 
 type PostgresConfig struct {
@@ -12,17 +13,15 @@ type PostgresConfig struct {
     Username string
     Password string
     DBName   string
+    SSLMode  string
 }
 
 func NewPostgresDB(cfg PostgresConfig) (*pgx.Conn, error) {
 
-    db, err := pgx.Connect(pgx.ConnConfig{
-        Host:     cfg.Host,
-        Port:     cfg.Port,
-        Password: cfg.Password,
-        User:     cfg.Username,
-        Database: cfg.DBName,
-    })
+    connStr := fmt.Sprintf(`host=%s port=%d user=%s dbname=%s password=%s sslmode=%s`,
+        cfg.Host, cfg.Port, cfg.Username, cfg.DBName, cfg.Password, cfg.SSLMode)
+    db, err := pgx.Connect(context.Background(), connStr)
+
     if err != nil {
         return nil, err
     }

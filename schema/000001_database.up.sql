@@ -6,22 +6,22 @@ CREATE TABLE users (
     email      VARCHAR(50) UNIQUE,
     phone      VARCHAR(15) UNIQUE,
     birthday   DATE,
-    created_at TIMESTAMP NOT NULL
+    created_at TIMESTAMP   NOT NULL
 );
 
 CREATE TABLE posts (
     id         SERIAL PRIMARY KEY,
-    author_id  INTEGER NOT NUll,
+    author_id  INTEGER   NOT NUll,
 
-    content    TEXT NOT NUll,
+    content    TEXT      NOT NUll,
     created_at TIMESTAMP NOT NULL,
 
-    FOREIGN KEY (author_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
 CREATE TABLE auth (
     user_id  INTEGER UNIQUE NOT NUll,
-    password VARCHAR(255) NOT NUll,
+    password VARCHAR(255)   NOT NUll,
 
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
