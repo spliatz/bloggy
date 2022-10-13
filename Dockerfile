@@ -2,8 +2,11 @@
 FROM golang:alpine AS build
 
 WORKDIR /go/src/bloggy-backend/
-COPY . .
+
+COPY go.mod .
+COPY go.sum .
 RUN go mod download
+COPY . .
 RUN go build -o bloggy_backend cmd/app.go
 
 # Deploy

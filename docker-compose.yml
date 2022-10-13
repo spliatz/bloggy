@@ -30,7 +30,7 @@ services:
       - 5436:5432
     healthcheck:
       test: "pg_isready --username=postgres && psql --username=postgres --list"
-      interval: 10s
+      interval: 5s
       timeout: 3s
       retries: 5
   migrate:
@@ -39,11 +39,11 @@ services:
       - ./schema:/schema
     command:
       [
-        "-path",
-        "/schema",
-        "-database",
-        "postgres://postgres:docker@db:5432/postgres?sslmode=disable",
-        "up"
+          "-path",
+          "/schema",
+          "-database",
+          "postgres://postgres:docker@db:5432/postgres?sslmode=disable",
+          "up"
       ]
     depends_on:
       db:
