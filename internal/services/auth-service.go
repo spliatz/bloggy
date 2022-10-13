@@ -3,6 +3,7 @@ package services
 import (
     "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/utils"
 )
 
 type AuthService struct {
@@ -15,18 +16,22 @@ func newAuthService(repos *repository.Repository) *AuthService {
     }
 }
 
-func (s *AuthService) Registration(input *structs.UserCreateInput) (int, error) {
+func (s *AuthService) SignUp(req *structs.SignUpRequest) (id int, err error) {
 
-    userId, err := s.repos.Registration(input)
-    if err != nil {
-        return -1, err
+    if err = utils.CheckUsername(req.Username); err != nil {
+        return 0, err
     }
 
-    return userId, nil
-}
+    if err = utils.CheckPassword(req.Password); err != nil {
+        return 0, err
+    }
 
-func (s *AuthService) Login() {
+    id, err = s.repos.SignUp(req)
+    if err != nil {
+        return 0, err
+    }
 
+    return id, nil
 }
 
 func (s *AuthService) generateAccessToken() {

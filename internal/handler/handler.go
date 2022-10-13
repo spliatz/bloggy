@@ -12,11 +12,10 @@ type Handlers struct {
 }
 
 type user interface {
-    create(ctx *gin.Context)
 }
 
 type auth interface {
-    registration(ctx *gin.Context)
+    signUp(ctx *gin.Context)
 }
 
 func NewHandlers(s *services.Services) *Handlers {
@@ -29,7 +28,7 @@ func NewHandlers(s *services.Services) *Handlers {
 func (h *Handlers) InitRoutes() *gin.Engine {
     router := gin.New()
 
-    router.POST("/registration", h.registration)
+    router.POST("/signup", h.signUp)
 
     return router
 }

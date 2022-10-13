@@ -11,11 +11,10 @@ type Services struct {
 }
 
 type User interface {
-    Create(input *structs.UserCreateInput) (*structs.User, error)
 }
 
 type Auth interface {
-    Registration(input *structs.UserCreateInput) (int, error)
+    SignUp(req *structs.SignUpRequest) (id int, err error)
 }
 
 func NewServices(repos *repository.Repository) *Services {

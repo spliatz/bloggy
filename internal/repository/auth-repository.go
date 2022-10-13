@@ -4,12 +4,11 @@ import (
     "context"
     "errors"
     "fmt"
-    "strings"
-    "time"
 
     "github.com/jackc/pgx/v5"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 type AuthRepository struct {
@@ -22,43 +21,52 @@ func newAuthRepository(db *pgx.Conn) *AuthRepository {
     }
 }
 
-func (r *AuthRepository) Registration(input *structs.UserCreateInput) (int, error) {
+func (r *AuthRepository) SignUp(req *structs.SignUpRequest) (id int, err error) {
 
-    args, argsValue, argsOrder, err := r.prepareCreateUserQuery(input)
-    if err != nil {
-        return -1, err
+    err = r.db.QueryRow(context.Background(), fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE username = $1
+    `, usersTable), req.Username).Scan(&id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return 0, e.ErrTakenUsername
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return 0, err
     }
 
     tx, err := r.db.Begin(context.Background())
 
-    createUserQueryString := fmt.Sprintf(`
-        INSERT INTO %s (%s)
-        values(%s)
-        RETURNING id, name, username, created_at, birthday, email, phone
-    `, usersTable, strings.Join(args, ", "), strings.Join(argsOrder, ", "))
-
-    user := structs.User{}
-    err = tx.QueryRow(context.Background(), createUserQueryString, argsValue...).Scan(
-        &user.Id, &user.Name, &user.Username, &user.CreatedAt, &user.Birthday, &user.Email, &user.Phone)
+    // Создание пользователя
+    err = tx.QueryRow(context.Background(), fmt.Sprintf(`
+        INSERT INTO %s (username, name, email, phone, birthday, created_at)
+        VALUES ($1, $2, $3, $4, $5, NOW())
+        RETURNING id
+    `, usersTable), req.Username, req.Name, req.Email, req.Phone, req.Birthday).Scan(&id)
     if err != nil {
         tx.Rollback(context.Background())
-        return -1, err
+        return 0, err
     }
 
-    var userId int
-    query := fmt.Sprintf(`INSERT INTO %s (user_id, password) values ($1, $2) RETURNING user_id`, authTable)
-    err = r.db.QueryRow(context.Background(), query, user.Id, *input.Password).Scan(&userId)
+    // Привязка пароля
+    err = r.db.QueryRow(context.Background(), fmt.Sprintf(`
+        INSERT INTO %s (user_id, password)
+        VALUES ($1, $2)
+        RETURNING user_id
+    `, authTable), id, req.Password).Scan(&id)
     if err != nil {
         tx.Rollback(context.Background())
-        return -1, err
+        return 0, err
     }
 
     err = tx.Commit(context.Background())
     if err != nil {
-        return -1, err
+        return 0, err
     }
 
-    return userId, nil
+    return id, nil
 }
 
 func (r *AuthRepository) isPasswordMatch(input *structs.AuthInput) (bool, error) {
@@ -90,56 +98,4 @@ func (r *AuthRepository) AddRefreshToken(input *structs.AuthInput, token string)
     query := fmt.Sprintf("INSERT INTO %s (user_id, token) values ($1, $2) RETURNING user_id", refreshTable)
     err = r.db.QueryRow(context.Background(), query, *input.UserId, token).Scan(&userId)
     return err
-}
-
-func (r *AuthRepository) prepareCreateUserQuery(input *structs.UserCreateInput) (
-    args []string, argsValue []interface{}, argsOrder []string, err error) {
-
-    args = make([]string, 0)
-    argsValue = make([]interface{}, 0)
-    argsOrder = make([]string, 0)
-    argId := 1
-
-    args = append(args, "username")
-    argsValue = append(argsValue, *input.Username)
-    argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-    argId++
-
-    args = append(args, "name")
-    argsValue = append(argsValue, *input.Name)
-    argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-    argId++
-
-    args = append(args, "created_at")
-    argsValue = append(argsValue, time.Now())
-    argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-    argId++
-
-    if input.Birthday != nil {
-        birthday, err := time.Parse("02-01-2006", *input.Birthday)
-        if err != nil {
-            return nil, nil, nil, err
-        }
-
-        args = append(args, "birthday")
-        argsValue = append(argsValue, birthday)
-        argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-        argId++
-    }
-
-    if input.Email != nil {
-        args = append(args, fmt.Sprintf("email"))
-        argsValue = append(argsValue, *input.Email)
-        argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-        argId++
-    }
-
-    if input.Phone != nil {
-        args = append(args, fmt.Sprintf("phone"))
-        argsValue = append(argsValue, *input.Phone)
-        argsOrder = append(argsOrder, fmt.Sprintf("$%x", argId))
-        argId++
-    }
-
-    return
 }
