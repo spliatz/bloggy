@@ -1,4 +1,5 @@
-CREATE TABLE users (
+CREATE TABLE users
+(
     id         SERIAL PRIMARY KEY,
     name       VARCHAR(60) NOT NULL,
     username   VARCHAR(30) NOT NULL UNIQUE,
@@ -9,7 +10,8 @@ CREATE TABLE users (
     created_at TIMESTAMP   NOT NULL
 );
 
-CREATE TABLE posts (
+CREATE TABLE posts
+(
     id         SERIAL PRIMARY KEY,
     author_id  INTEGER   NOT NUll,
 
@@ -19,9 +21,18 @@ CREATE TABLE posts (
     FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
 );
 
-CREATE TABLE auth (
+CREATE TABLE auth
+(
     user_id  INTEGER UNIQUE NOT NUll,
     password VARCHAR(255)   NOT NUll,
+
+    FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
+);
+
+CREATE TABLE refresh
+(
+    user_id INTEGER UNIQUE NOT NULL,
+    token   VARCHAR(255)   NOT NUll,
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

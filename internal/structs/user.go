@@ -8,10 +8,10 @@ import (
 type User struct {
 	Id        int         `json:"id" db:"id"`
 	Username  string      `json:"username" db:"username" binding:"required"`
-	Name      string      `json:"name" db:"name"`
+	Name      pgtype.Text `json:"name" db:"name"`
 	Birthday  pgtype.Date `json:"birthday" db:"birthday"`
-	Email     string      `json:"email" db:"email"`
-	Phone     string      `json:"phone" db:"phone"`
+	Email     pgtype.Text `json:"email" db:"email"`
+	Phone     pgtype.Text `json:"phone" db:"phone"`
 	CreatedAt time.Time   `json:"created_at" db:"created_at"`
 }
 
