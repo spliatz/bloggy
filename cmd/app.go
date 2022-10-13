@@ -15,7 +15,6 @@ import (
 func main() {
 
     dbPort, err := strconv.Atoi(os.Getenv("POSTGRES_LOCAL_PORT"))
-
     if dbPort > 1<<16 || dbPort < 1 || err != nil {
         logrus.Fatal("Подключение к базе данных не удалось: некорректный порт")
     }
@@ -28,7 +27,6 @@ func main() {
         Password: os.Getenv("POSTGRES_PASSWORD"),
         SSLMode:  os.Getenv("POSTGRES_SSLMode"),
     })
-
     if err != nil {
         logrus.Fatal("Подключение к базе данных не удалось: ", err)
     }

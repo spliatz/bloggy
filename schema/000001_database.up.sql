@@ -1,7 +1,7 @@
 CREATE TABLE users
 (
     id         SERIAL PRIMARY KEY,
-    name       VARCHAR(60) NOT NULL,
+    name       VARCHAR(60),
     username   VARCHAR(30) NOT NULL UNIQUE,
 
     email      VARCHAR(50) UNIQUE,
@@ -13,9 +13,9 @@ CREATE TABLE users
 CREATE TABLE posts
 (
     id         SERIAL PRIMARY KEY,
-    author_id  INTEGER   NOT NUll,
+    author_id  INTEGER   NOT NULL,
 
-    content    TEXT      NOT NUll,
+    content    TEXT      NOT NULL,
     created_at TIMESTAMP NOT NULL,
 
     FOREIGN KEY (author_id) REFERENCES users (id) ON DELETE CASCADE
@@ -23,8 +23,8 @@ CREATE TABLE posts
 
 CREATE TABLE auth
 (
-    user_id  INTEGER UNIQUE NOT NUll,
-    password VARCHAR(255)   NOT NUll,
+    user_id  INTEGER UNIQUE NOT NULL,
+    password VARCHAR(255)   NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
@@ -32,7 +32,7 @@ CREATE TABLE auth
 CREATE TABLE refresh
 (
     user_id INTEGER UNIQUE NOT NULL,
-    token   VARCHAR(255)   NOT NUll,
+    token   VARCHAR(255)   NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );
