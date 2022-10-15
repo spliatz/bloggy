@@ -31,8 +31,9 @@ CREATE TABLE auth
 
 CREATE TABLE refresh
 (
-    user_id INTEGER UNIQUE NOT NULL,
-    token   VARCHAR(255)   NOT NULL,
+    user_id    INTEGER      NOT NULL,
+    token      VARCHAR(255) NOT NULL,
+    expires_at TIMESTAMP    NOT NULL,
 
     FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
 );

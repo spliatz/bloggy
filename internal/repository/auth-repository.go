@@ -2,13 +2,13 @@ package repository
 
 import (
     "context"
-    "errors"
     "fmt"
+    "time"
 
     "github.com/jackc/pgx/v5"
+    "github.com/jackc/pgx/v5/pgtype"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
-    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 type AuthRepository struct {
@@ -21,81 +21,119 @@ func newAuthRepository(db *pgx.Conn) *AuthRepository {
     }
 }
 
-func (r *AuthRepository) SignUp(req *structs.SignUpRequest) (id int, err error) {
+type User struct {
+    Id        int         `db:"id"`
+    Username  string      `db:"username"`
+    Password  string      `db:"password"`
+    Name      pgtype.Text `db:"name"`
+    Birthday  pgtype.Date `db:"birthday"`
+    Email     pgtype.Text `db:"email"`
+    Phone     pgtype.Text `db:"phone"`
+    CreatedAt time.Time   `db:"created_at"`
+}
 
-    err = r.db.QueryRow(context.Background(), fmt.Sprintf(`
+func (r *AuthRepository) SignUp(ctx context.Context, u User) (User, error) {
+
+    _id := 0
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
         SELECT id
         FROM %s
         WHERE username = $1
-    `, usersTable), req.Username).Scan(&id)
+    `, usersTable), u.Username).Scan(&_id)
     if err == nil {
         // Если он нашел пользователя и успешно просканировал, то он существует
-        return 0, e.ErrTakenUsername
+        return User{}, errors.ErrTakenUsername
     }
     if !errors.Is(err, pgx.ErrNoRows) {
         // Если ошибка не является ошибкой "Не найден пользователь"
-        return 0, err
+        return User{}, err
     }
 
-    tx, err := r.db.Begin(context.Background())
+    tx, err := r.db.Begin(ctx)
+
+    newU := User{}
 
     // Создание пользователя
-    err = tx.QueryRow(context.Background(), fmt.Sprintf(`
+    err = tx.QueryRow(ctx, fmt.Sprintf(`
         INSERT INTO %s (username, name, email, phone, birthday, created_at)
-        VALUES ($1, $2, $3, $4, $5, NOW())
-        RETURNING id
-    `, usersTable), req.Username, req.Name, req.Email, req.Phone, req.Birthday).Scan(&id)
+        VALUES ($1, $2, $3, $4, $5, $6)
+        RETURNING id, username, name, email, phone, birthday, created_at
+    `, usersTable), u.Username, u.Name, u.Email, u.Phone, u.Birthday, u.CreatedAt).Scan(
+        &newU.Id, &newU.Username, &newU.Name, &newU.Email, &newU.Phone, &newU.Birthday, &newU.CreatedAt)
     if err != nil {
-        tx.Rollback(context.Background())
-        return 0, err
+        _ = tx.Rollback(ctx)
+        return User{}, err
     }
 
     // Привязка пароля
-    err = r.db.QueryRow(context.Background(), fmt.Sprintf(`
+    err = tx.QueryRow(ctx, fmt.Sprintf(`
         INSERT INTO %s (user_id, password)
         VALUES ($1, $2)
-        RETURNING user_id
-    `, authTable), id, req.Password).Scan(&id)
+        RETURNING user_id, password
+    `, authTable), newU.Id, u.Password).Scan(&newU.Id, &newU.Password)
     if err != nil {
-        tx.Rollback(context.Background())
-        return 0, err
+        _ = tx.Rollback(ctx)
+        return User{}, err
     }
 
-    err = tx.Commit(context.Background())
+    err = tx.Commit(ctx)
     if err != nil {
-        return 0, err
+        return User{}, err
     }
 
-    return id, nil
+    return newU, nil
 }
 
-func (r *AuthRepository) isPasswordMatch(input *structs.AuthInput) (bool, error) {
-    var userPassword string
-    query := fmt.Sprintf(`SELECT user_id, password FROM %s WHERE user_id = $1`, authTable)
-    err := r.db.QueryRow(context.Background(), query, *input.UserId).Scan(&userPassword)
-    if err != nil {
-        return false, err
-    }
-
-    if userPassword != *input.Password {
-        return false, nil
-    }
-
-    return true, nil
+type Session struct {
+    RefreshToken string    `db:"token"`
+    ExpiresAt    time.Time `db:"expires_at"`
 }
 
-func (r *AuthRepository) AddRefreshToken(input *structs.AuthInput, token string) error {
-    isMatch, err := r.isPasswordMatch(input)
+func (r *AuthRepository) SetSession(ctx context.Context, userId int, s Session) error {
+
+    _, err := r.db.Exec(ctx, fmt.Sprintf(`
+        INSERT INTO %s(user_id, token, expires_at)
+        VALUES ($1, $2, $3)
+    `, refreshTable), userId, s.RefreshToken, s.ExpiresAt)
     if err != nil {
         return err
     }
 
-    if !isMatch {
-        return errors.New("невереный пароль")
+    return nil
+}
+
+func (r *AuthRepository) CheckRefresh(ctx context.Context, refreshToken string) error {
+    var expiresAt pgtype.Date
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT expires_at
+        FROM %s
+        WHERE token = $1
+    `, refreshTable), refreshToken).Scan(&expiresAt)
+    if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+        return err
     }
 
-    var userId int
-    query := fmt.Sprintf("INSERT INTO %s (user_id, token) values ($1, $2) RETURNING user_id", refreshTable)
-    err = r.db.QueryRow(context.Background(), query, *input.UserId, token).Scan(&userId)
-    return err
+    if expiresAt.Valid {
+        if time.Now().After(expiresAt.Time) {
+            return errors.ErrTokenExpired
+        }
+    }
+
+    return nil
+}
+
+func (r *AuthRepository) DeleteRefresh(ctx context.Context, refreshToken string) error {
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
+                DELETE FROM %s
+                WHERE token = $1
+                RETURNING token
+            `, refreshTable), refreshToken).Scan(&refreshToken)
+    if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+        return err
+    }
+    if errors.Is(err, pgx.ErrNoRows) {
+        return errors.WrongToken
+    }
+
+    return nil
 }

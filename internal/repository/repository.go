@@ -1,9 +1,9 @@
 package repository
 
 import (
-    "github.com/jackc/pgx/v5"
+    "context"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/internal/structs"
+    "github.com/jackc/pgx/v5"
 )
 
 const (
@@ -14,21 +14,25 @@ const (
 )
 
 type Repository struct {
-    User
+    UserRepo
     Auth
 }
 
-type User interface {
+type UserRepo interface {
+    GetByRefreshToken(сtx context.Context, refreshToken string) (User, error)
+    GetByCredentials(ctx context.Context, username string, passHash string) (User, error)
 }
 
 type Auth interface {
-    SignUp(input *structs.SignUpRequest) (id int, err error)
-    AddRefreshToken(input *structs.AuthInput, token string) error
+    SignUp(ctx context.Context, u User) (User, error)
+    SetSession(ctx context.Context, userId int, s Session) error
+    CheckRefresh(ctx context.Context, refresh string) error
+    DeleteRefresh(ctx context.Context, refreshToken string) error
 }
 
 func NewRepository(db *pgx.Conn) *Repository {
     return &Repository{
-        User: newUserRepository(db),
-        Auth: newAuthRepository(db),
+        UserRepo: newUserRepository(db),
+        Auth:     newAuthRepository(db),
     }
 }

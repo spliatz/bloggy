@@ -4,6 +4,8 @@ import (
     "os"
     "strconv"
 
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
     "github.com/sirupsen/logrus"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/handler"
@@ -33,7 +35,18 @@ func main() {
 
     logrus.Println("База данных успешно подключена")
 
-    handlers := handler.NewHandlers(services.NewServices(repository.NewRepository(db)))
+    // TODO: Переделать на ENV
+    // FIXME: Серьезно
+    salt := "random string test"
+    signKey := "random string text"
+
+    tManager, err := auth.NewManager(signKey)
+    if err != nil {
+        logrus.Fatal("Не удалось создать менеджер токенов ", err)
+    }
+
+    service := services.NewServices(repository.NewRepository(db), hash.NewSHA1Hasher(salt), tManager)
+    handlers := handler.NewHandlers(service, tManager)
     srv := server.NewServer()
 
     srvPort, err := strconv.Atoi(os.Getenv("PORT"))
