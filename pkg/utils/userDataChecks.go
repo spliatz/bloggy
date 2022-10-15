@@ -1,7 +1,9 @@
 package utils
 
 import (
+    "strconv"
     "strings"
+    "time"
     "unicode"
 
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
@@ -51,6 +53,50 @@ func CheckPassword(s string) error {
     }
 
     return nil
+}
+
+func CheckName(s string) error {
+    if len(s) > 60 {
+        return errors.ErrWrongNameLength
+    }
+
+    for _, c := range []rune(s) {
+        if !unicode.IsLetter(c) && !(c == ' ') {
+            return errors.ErrWrongName
+        }
+    }
+
+    return nil
+}
+
+func ParseDate(s string) (time.Time, error) {
+    dateParts := strings.Split(s, "-")
+    if len(dateParts) != 3 || len(dateParts[0]) != 4 || len(dateParts[1]) != 2 || len(dateParts[2]) != 2 {
+        return time.Time{}, errors.ErrWrongDateFormat
+    }
+
+    year, err := strconv.Atoi(dateParts[0])
+    if err != nil {
+        return time.Time{}, errors.ErrWrongDateFormat
+    }
+
+    month, err := strconv.Atoi(dateParts[1])
+    if err != nil {
+        return time.Time{}, errors.ErrWrongDateFormat
+    }
+
+    day, err := strconv.Atoi(dateParts[2])
+    if err != nil {
+        return time.Time{}, errors.ErrWrongDateFormat
+    }
+
+    date := time.Date(
+        year,
+        time.Month(month),
+        day,
+        0, 0, 0, 0, nil)
+
+    return date, nil
 }
 
 func IsLatin(c rune) bool {

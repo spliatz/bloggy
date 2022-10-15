@@ -19,6 +19,74 @@ func newUserRepository(db *pgx.Conn) *UserRepository {
     }
 }
 
+func (r *UserRepository) EditById(ctx context.Context, id int, req map[string]string) (User, error) {
+    // Проверяем доступность username
+    _id := 0
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE username = $1
+    `, usersTable), req["username"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return User{}, errors.ErrTakenUsername
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return User{}, err
+    }
+
+    // Проверяем доступность email
+    err = r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE email = $1
+    `, usersTable), req["email"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return User{}, errors.ErrTakenEmail
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return User{}, err
+    }
+
+    // Проверяем доступность phone
+    err = r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE phone = $1
+    `, usersTable), req["phone"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return User{}, errors.ErrTakenPhone
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return User{}, err
+    }
+
+    // Создаем параметры
+    var updateQuery []string
+    for key, value := range req {
+        updateQuery = append(updateQuery, fmt.Sprintf(`%s = '%s'`, key, value))
+    }
+
+    user := User{}
+    err = r.db.QueryRow(ctx, fmt.Sprintf(`
+        UPDATE %s 
+        SET %s
+        WHERE id = $1
+        RETURNING username, name, phone, email, birthday
+    `, usersTable, strings.Join(updateQuery, ", ")), id).Scan(
+        &user.Username, &user.Name, &user.Phone, &user.Email, &user.Birthday)
+    if err != nil {
+        return User{}, err
+    }
+
+    return user, nil
+}
+
 func (r *UserRepository) GetByRefreshToken(ctx context.Context, refreshToken string) (User, error) {
     user := User{}
 
@@ -55,6 +123,26 @@ func (r *UserRepository) GetByCredentials(ctx context.Context, username string, 
         &user.Email, &user.Phone, &user.CreatedAt)
     if errors.Is(err, pgx.ErrNoRows) {
         return User{}, errors.ErrWrongPassOrUsername
+    }
+    if err != nil {
+        return User{}, err
+    }
+
+    return user, nil
+}
+
+func (r *UserRepository) GetByUsername(ctx context.Context, username string) (User, error) {
+    user := User{}
+
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id, username, name, birthday, email, phone, created_at
+        FROM %s
+        WHERE username = $1
+    `, usersTable), username).Scan(
+        &user.Id, &user.Username, &user.Name, &user.Birthday,
+        &user.Email, &user.Phone, &user.CreatedAt)
+    if errors.Is(err, pgx.ErrNoRows) {
+        return User{}, errors.ErrUsernameNotFound
     }
     if err != nil {
         return User{}, err

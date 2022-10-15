@@ -14,6 +14,8 @@ type Services struct {
 }
 
 type User interface {
+    GetUserByUsername(ctx context.Context, username string) (UserResponse, error)
+    EditById(ctx context.Context, id int, input EditInput) (UserResponse, error)
 }
 
 type Auth interface {

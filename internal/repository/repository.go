@@ -19,8 +19,10 @@ type Repository struct {
 }
 
 type UserRepo interface {
+    GetByUsername(сtx context.Context, username string) (User, error)
     GetByRefreshToken(сtx context.Context, refreshToken string) (User, error)
     GetByCredentials(ctx context.Context, username string, passHash string) (User, error)
+    EditById(сtx context.Context, id int, req map[string]string) (User, error)
 }
 
 type Auth interface {

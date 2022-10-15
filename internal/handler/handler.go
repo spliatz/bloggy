@@ -43,5 +43,11 @@ func (h *Handlers) InitRoutes() *gin.Engine {
         auth.POST("/refresh", h.refresh)
     }
 
+    users := router.Group("/user", h.userIdentity)
+    {
+        users.PATCH("", h.editUser)
+        users.GET("/:username", h.getUserByUsername)
+    }
+
     return router
 }
