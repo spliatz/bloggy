@@ -30,10 +30,7 @@ type tokenResponse struct {
 func (h *authHandler) signUp(c *gin.Context) {
     var i services.SignUpInput
     if err := c.BindJSON(&i); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
@@ -44,17 +41,11 @@ func (h *authHandler) signUp(c *gin.Context) {
             errors.ErrShortPass, errors.ErrSimplePass, errors.ErrWrongUsername,
             errors.ErrWrongUsernameLength, errors.ErrTakenUsername, errors.ErrWrongDateFormat,
         ) {
-            c.JSON(http.StatusBadRequest, gin.H{
-                "error": err.Error(),
-            })
-
+            errors.NewHTTPError(c, http.StatusBadRequest, err)
             return
         }
 
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -64,33 +55,21 @@ func (h *authHandler) signUp(c *gin.Context) {
 func (h *authHandler) signIn(c *gin.Context) {
     var i services.SignInInput
     if err := c.BindJSON(&i); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
     res, err := h.authService.SignIn(c.Request.Context(), i)
     if errors.Is(err, errors.ErrWrongPassOrUsername) {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
     if errors.Is(err, errors.ErrTokenExpired) {
-        c.JSON(http.StatusUnauthorized, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusUnauthorized, err)
         return
     }
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -104,26 +83,17 @@ type refreshInput struct {
 func (h *authHandler) refresh(c *gin.Context) {
     var i refreshInput
     if err := c.BindJSON(&i); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
     res, err := h.authService.RefreshTokens(c.Request.Context(), i.Token)
     if errors.Is(err, errors.WrongToken) {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
-
+        errors.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 

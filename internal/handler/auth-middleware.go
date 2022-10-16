@@ -7,6 +7,8 @@ import (
     "strings"
 
     "github.com/gin-gonic/gin"
+
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 const (
@@ -18,10 +20,7 @@ const (
 func (h *authHandler) userIdentity(c *gin.Context) {
     id, err := h.parseAuthHeader(c)
     if err != nil {
-        c.JSON(http.StatusUnauthorized, gin.H{
-            "error": err.Error(),
-        })
-
+        e.NewHTTPError(c, http.StatusUnauthorized, err)
         return
     }
 

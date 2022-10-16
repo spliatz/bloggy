@@ -4,7 +4,8 @@ import (
     "net/http"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+
     "github.com/gin-gonic/gin"
 )
 
@@ -22,22 +23,16 @@ func (h *UserHandler) getUserByUsername(c *gin.Context) {
     username := c.Param("username")
 
     user, err := h.userService.GetUserByUsername(c.Request.Context(), username)
-    if errors.Is(err, errors.ErrWrongUsername) {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
+    if e.Is(err, e.ErrWrongUsername) {
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
-    if errors.Is(err, errors.ErrUsernameNotFound) {
-        c.JSON(http.StatusNotFound, gin.H{
-            "error": err.Error(),
-        })
+    if e.Is(err, e.ErrUsernameNotFound) {
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
@@ -48,42 +43,32 @@ func (h *UserHandler) editUser(c *gin.Context) {
     c.Set("user_id", 1)
     userIdI, exist := c.Get("user_id")
     if !exist {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": errors.ErrWrongId.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, e.ErrUserDoesNotExist)
         return
     }
     userId, _ := userIdI.(int)
 
     eReq := services.EditInput{}
     if err := c.BindJSON(&eReq); err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
     user, err := h.userService.EditById(c.Request.Context(), userId, eReq)
-    if errors.IsOneOf(
+    if e.IsOneOf(
         err,
-        errors.ErrTakenUsername, errors.ErrTakenEmail, errors.ErrTakenPhone,
-        errors.ErrWrongNameLength, errors.ErrWrongName,
+        e.ErrTakenUsername, e.ErrTakenEmail, e.ErrTakenPhone,
+        e.ErrWrongNameLength, e.ErrWrongName,
     ) {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
-    if errors.Is(err, errors.ErrIdNotFound) {
-        c.JSON(http.StatusNotFound, gin.H{
-            "error": err.Error(),
-        })
+    if e.Is(err, e.ErrIdNotFound) {
+        e.NewHTTPError(c, http.StatusNotFound, err)
         return
     }
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 

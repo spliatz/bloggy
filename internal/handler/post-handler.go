@@ -25,27 +25,21 @@ func newPostHandler(sp services.Post, su services.User) *PostHandler {
 func (h *PostHandler) Create(c *gin.Context) {
     userId, exist := c.Get(userCtx)
     if !exist {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": e.ErrUserDoesNotExist.Error(),
-        })
+        e.NewHTTPError(c, http.StatusNotFound, e.ErrUserDoesNotExist)
         return
     }
 
     var createRequest services.CreatePostInput
     err := c.BindJSON(&createRequest)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": e.ErrContentNotFound.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, e.ErrContentNotFound)
         return
     }
 
     createRequest.UserId = userId.(int)
     postId, err := h.postService.Create(createRequest)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -59,17 +53,13 @@ func (h *PostHandler) GetOne(c *gin.Context) {
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": "invalid post id",
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
 
     post, err := h.postService.GetOne(postId)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": e.ErrPostNotFound.Error(),
-        })
+        e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -81,9 +71,7 @@ func (h *PostHandler) GetAllUserPosts(c *gin.Context) {
 
     posts, err := h.postService.GetAllUserPosts(username)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 
@@ -93,41 +81,31 @@ func (h *PostHandler) GetAllUserPosts(c *gin.Context) {
 func (h *PostHandler) Delete(c *gin.Context) {
     userId, exist := c.Get(userCtx)
     if !exist {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": e.ErrUserDoesNotExist.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, e.ErrUserDoesNotExist)
         return
     }
 
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
-        c.JSON(http.StatusBadRequest, gin.H{
-            "error": "invalid post id",
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, e.ErrInvalidPostId)
         return
     }
 
     post, err := h.postService.GetOne(postId)
     if err != nil {
-        c.JSON(http.StatusNotFound, gin.H{
-            "error": e.ErrPostNotFound.Error(),
-        })
+        e.NewHTTPError(c, http.StatusBadRequest, e.ErrPostNotFound)
         return
     }
 
     if post.UserId != userId {
-        c.JSON(http.StatusUnauthorized, gin.H{
-            "error": e.ErrUserIsNotAuthor.Error(),
-        })
+        e.NewHTTPError(c, http.StatusUnauthorized, e.ErrUserIsNotAuthor)
         return
     }
 
     err = h.postService.Delete(postId)
     if err != nil {
-        c.JSON(http.StatusInternalServerError, gin.H{
-            "error": err.Error(),
-        })
+        e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
     }
 

@@ -2,6 +2,8 @@ package errors
 
 import (
     "errors"
+
+    "github.com/gin-gonic/gin"
 )
 
 func Is(err, target error) bool {
@@ -16,4 +18,10 @@ func IsOneOf(err error, targets ...error) bool {
     }
 
     return false
+}
+
+func NewHTTPError(c *gin.Context, status int, err error) {
+    c.AbortWithStatusJSON(status, gin.H{
+        "error": err.Error(),
+    })
 }
