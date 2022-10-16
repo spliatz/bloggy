@@ -10,6 +10,7 @@ import (
 type Handlers struct {
     user
     auth
+    post
 }
 
 type user interface {
@@ -26,10 +27,18 @@ type auth interface {
     userIdentity(ctx *gin.Context)
 }
 
+type post interface {
+    Create(c *gin.Context)
+    GetOne(c *gin.Context)
+    GetAllUserPosts(c *gin.Context)
+    Delete(c *gin.Context)
+}
+
 func NewHandlers(s *services.Services, t a.TokenManager) *Handlers {
     return &Handlers{
         user: newUserHandler(s.User),
         auth: newAuthHandler(s.Auth, t),
+        post: newPostHandler(s.Post, s.User),
     }
 }
 
@@ -43,10 +52,26 @@ func (h *Handlers) InitRoutes() *gin.Engine {
         auth.POST("/refresh", h.refresh)
     }
 
-    users := router.Group("/user", h.userIdentity)
+    user := router.Group("/user")
     {
-        users.PATCH("", h.editUser)
-        users.GET("/:username", h.getUserByUsername)
+        authProtectedUsers := user.Group("", h.userIdentity)
+        {
+            authProtectedUsers.PATCH("", h.editUser)
+            authProtectedUsers.GET("/:username", h.getUserByUsername)
+        }
+
+        user.GET("/:username/posts", h.post.GetAllUserPosts)
+    }
+
+    post := router.Group("/post")
+    {
+        authProtectedPost := post.Group("", h.userIdentity)
+        {
+            authProtectedPost.POST("", h.post.Create)
+            authProtectedPost.DELETE("/:id", h.post.Delete)
+        }
+
+        post.GET("/:id", h.post.GetOne)
     }
 
     return router

@@ -9,6 +9,7 @@ var ErrWrongUsernameLength = errors.New("username must be 3 to 30 characters lon
 var ErrUsernameNotFound = errors.New("username does not exist")
 var ErrWrongId = errors.New("id must be non negative integer")
 var ErrIdNotFound = errors.New("id does not exist")
+var ErrUserDoesNotExist = errors.New("user does not exist")
 var ErrTakenUsername = errors.New("a user with this username already exists")
 var ErrTakenEmail = errors.New("a user with this email already exists")
 var ErrTakenPhone = errors.New("a user with this phone already exists")

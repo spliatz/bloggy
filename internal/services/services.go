@@ -11,6 +11,7 @@ import (
 type Services struct {
     User
     Auth
+    Post
 }
 
 type User interface {
@@ -24,9 +25,17 @@ type Auth interface {
     RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error)
 }
 
+type Post interface {
+    Create(req CreatePostInput) (id int, err error)
+    GetOne(id int) (repository.Post, error)
+    GetAllUserPosts(username string) ([]repository.Post, error)
+    Delete(postId int) error
+}
+
 func NewServices(repos *repository.Repository, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {
     return &Services{
         User: newUserService(repos),
         Auth: newAuthService(repos, hasher, tokenManager),
+        Post: newPostService(repos),
     }
 }

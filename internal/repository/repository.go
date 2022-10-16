@@ -16,6 +16,7 @@ const (
 type Repository struct {
     UserRepo
     Auth
+    PostRepo
 }
 
 type UserRepo interface {
@@ -32,9 +33,17 @@ type Auth interface {
     DeleteRefresh(ctx context.Context, refreshToken string) error
 }
 
+type PostRepo interface {
+    Create(req Post) (int, error)
+    GetOne(id int) (Post, error)
+    GetAllUserPosts(username string) ([]Post, error)
+    Delete(id int) error
+}
+
 func NewRepository(db *pgx.Conn) *Repository {
     return &Repository{
         UserRepo: newUserRepository(db),
         Auth:     newAuthRepository(db),
+        PostRepo: newPostRepository(db),
     }
 }
