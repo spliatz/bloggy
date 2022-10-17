@@ -109,7 +109,11 @@ func (r *AuthRepository) CheckRefresh(ctx context.Context, refreshToken string) 
         FROM %s
         WHERE token = $1
     `, refreshTable), refreshToken).Scan(&expiresAt)
-    if err != nil && !errors.Is(err, pgx.ErrNoRows) {
+    if err != nil {
+        if errors.Is(err, pgx.ErrNoRows) {
+            return errors.WrongToken
+        }
+
         return err
     }
 

@@ -92,6 +92,10 @@ func (h *authHandler) refresh(c *gin.Context) {
         errors.NewHTTPError(c, http.StatusBadRequest, err)
         return
     }
+    if errors.Is(err, errors.ErrTokenExpired) {
+        errors.NewHTTPError(c, http.StatusUnauthorized, err)
+        return
+    }
     if err != nil {
         errors.NewHTTPError(c, http.StatusInternalServerError, err)
         return

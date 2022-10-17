@@ -123,24 +123,17 @@ func (s *AuthService) SignIn(ctx context.Context, i SignInInput) (Tokens, error)
 }
 
 func (s *AuthService) RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error) {
-    /*
-       1. Проверить токен
-       2. Удалить в любом случае
-       3. Если он просрочен, выдать ошибку
-       4. Если не просрочен, создать новый токен
-    */
-
     err := s.repos.CheckRefresh(ctx, refreshToken)
-    if err != nil && !errors.Is(err, errors.ErrTokenExpired) {
-        return Tokens{}, err
-    }
+    if err != nil {
+        if errors.Is(err, errors.ErrTokenExpired) {
+            if err := s.repos.DeleteRefresh(ctx, refreshToken); err != nil {
+                return Tokens{}, err
+            }
 
-    if err := s.repos.DeleteRefresh(ctx, refreshToken); err != nil {
-        return Tokens{}, err
-    }
+            return Tokens{}, err
+        }
 
-    if errors.Is(err, errors.ErrTokenExpired) {
-        return Tokens{}, errors.ErrTokenExpired
+        return Tokens{}, err
     }
 
     user, err := s.repos.GetByRefreshToken(ctx, refreshToken)
@@ -148,7 +141,16 @@ func (s *AuthService) RefreshTokens(ctx context.Context, refreshToken string) (T
         return Tokens{}, nil
     }
 
-    return s.createSession(ctx, user.Id)
+    newTokens, err := s.createSession(ctx, user.Id)
+    if err != nil {
+        return Tokens{}, err
+    }
+
+    if err := s.repos.DeleteRefresh(ctx, refreshToken); err != nil {
+        return Tokens{}, err
+    }
+
+    return newTokens, nil
 }
 
 func (s *AuthService) createSession(ctx context.Context, userId int) (Tokens, error) {
