@@ -12,13 +12,11 @@ import (
 
 type PostHandler struct {
     postService services.Post
-    userService services.User
 }
 
-func newPostHandler(sp services.Post, su services.User) *PostHandler {
+func newPostHandler(sp services.Post) *PostHandler {
     return &PostHandler{
         postService: sp,
-        userService: su,
     }
 }
 
@@ -49,7 +47,7 @@ func (h *PostHandler) Create(c *gin.Context) {
 
 }
 
-func (h *PostHandler) GetOne(c *gin.Context) {
+func (h *PostHandler) GetOneById(c *gin.Context) {
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
@@ -57,7 +55,7 @@ func (h *PostHandler) GetOne(c *gin.Context) {
         return
     }
 
-    post, err := h.postService.GetOne(postId)
+    post, err := h.postService.GetOneById(postId)
     if err != nil {
         e.NewHTTPError(c, http.StatusInternalServerError, err)
         return
@@ -78,7 +76,7 @@ func (h *PostHandler) GetAllUserPosts(c *gin.Context) {
     c.JSON(http.StatusOK, posts)
 }
 
-func (h *PostHandler) Delete(c *gin.Context) {
+func (h *PostHandler) DeleteById(c *gin.Context) {
     userId, exist := c.Get(userCtx)
     if !exist {
         e.NewHTTPError(c, http.StatusBadRequest, e.ErrUserDoesNotExist)
@@ -92,7 +90,7 @@ func (h *PostHandler) Delete(c *gin.Context) {
         return
     }
 
-    post, err := h.postService.GetOne(postId)
+    post, err := h.postService.GetOneById(postId)
     if err != nil {
         e.NewHTTPError(c, http.StatusBadRequest, e.ErrPostNotFound)
         return
@@ -103,7 +101,7 @@ func (h *PostHandler) Delete(c *gin.Context) {
         return
     }
 
-    err = h.postService.Delete(postId)
+    err = h.postService.DeleteById(postId)
     if err != nil {
         e.NewHTTPError(c, http.StatusInternalServerError, err)
         return

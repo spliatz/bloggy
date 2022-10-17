@@ -40,7 +40,7 @@ func (r *PostRepository) Create(req Post) (int, error) {
     return postId, nil
 }
 
-func (r *PostRepository) GetOne(id int) (Post, error) {
+func (r *PostRepository) GetOneById(id int) (Post, error) {
     var post Post
     err := r.db.QueryRow(context.Background(),
         fmt.Sprintf(`SELECT id, author_id, content, created_at FROM %s WHERE id = $1`, postsTable),
@@ -85,7 +85,7 @@ func (r *PostRepository) GetAllUserPosts(username string) ([]Post, error) {
     return posts, nil
 }
 
-func (r *PostRepository) Delete(id int) error {
+func (r *PostRepository) DeleteById(id int) error {
     var postId int
     err := r.db.QueryRow(context.Background(),
         fmt.Sprintf(`DELETE FROM %s WHERE id = $1 RETURNING id`, postsTable),

@@ -29,16 +29,16 @@ type auth interface {
 
 type post interface {
     Create(c *gin.Context)
-    GetOne(c *gin.Context)
+    GetOneById(c *gin.Context)
     GetAllUserPosts(c *gin.Context)
-    Delete(c *gin.Context)
+    DeleteById(c *gin.Context)
 }
 
 func NewHandlers(s *services.Services, t a.TokenManager) *Handlers {
     return &Handlers{
         user: newUserHandler(s.User),
         auth: newAuthHandler(s.Auth, t),
-        post: newPostHandler(s.Post, s.User),
+        post: newPostHandler(s.Post),
     }
 }
 
@@ -68,10 +68,10 @@ func (h *Handlers) InitRoutes() *gin.Engine {
         authProtectedPost := post.Group("", h.userIdentity)
         {
             authProtectedPost.POST("", h.post.Create)
-            authProtectedPost.DELETE("/:id", h.post.Delete)
+            authProtectedPost.DELETE("/:id", h.post.DeleteById)
         }
 
-        post.GET("/:id", h.post.GetOne)
+        post.GET("/:id", h.post.GetOneById)
     }
 
     return router

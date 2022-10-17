@@ -36,14 +36,14 @@ func (s *PostService) Create(req CreatePostInput) (int, error) {
     return id, nil
 }
 
-func (s *PostService) GetOne(id int) (repository.Post, error) {
-    return s.repos.PostRepo.GetOne(id)
+func (s *PostService) GetOneById(id int) (repository.Post, error) {
+    return s.repos.PostRepo.GetOneById(id)
 }
 
 func (s *PostService) GetAllUserPosts(username string) ([]repository.Post, error) {
     return s.repos.GetAllUserPosts(username)
 }
 
-func (s *PostService) Delete(postId int) error {
-    return s.repos.PostRepo.Delete(postId)
+func (s *PostService) DeleteById(postId int) error {
+    return s.repos.PostRepo.DeleteById(postId)
 }

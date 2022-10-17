@@ -20,10 +20,10 @@ type Repository struct {
 }
 
 type UserRepo interface {
-    GetByUsername(сtx context.Context, username string) (User, error)
-    GetByRefreshToken(сtx context.Context, refreshToken string) (User, error)
+    GetByUsername(ctx context.Context, username string) (User, error)
+    GetByRefreshToken(ctx context.Context, refreshToken string) (User, error)
     GetByCredentials(ctx context.Context, username string, passHash string) (User, error)
-    EditById(сtx context.Context, id int, req map[string]string) (User, error)
+    EditById(ctx context.Context, id int, req map[string]string) (User, error)
 }
 
 type Auth interface {
@@ -35,9 +35,9 @@ type Auth interface {
 
 type PostRepo interface {
     Create(req Post) (int, error)
-    GetOne(id int) (Post, error)
+    GetOneById(id int) (Post, error)
     GetAllUserPosts(username string) ([]Post, error)
-    Delete(id int) error
+    DeleteById(id int) error
 }
 
 func NewRepository(db *pgx.Conn) *Repository {
