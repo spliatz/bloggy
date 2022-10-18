@@ -63,7 +63,7 @@ func (r *PostRepository) GetAllUserPosts(username string) ([]Post, error) {
     rows, err := r.db.Query(context.Background(), fmt.Sprintf(
         `
                 SELECT id, author_id, content, created_at 
-                FROM %s WHERE author_id = u.id`,
+                FROM %s WHERE author_id = $1`,
         postsTable), userId)
 
     if err != nil {

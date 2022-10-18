@@ -4,15 +4,27 @@ import (
     "os"
     "strconv"
 
+    "github.com/sirupsen/logrus"
+
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
-    "github.com/sirupsen/logrus"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/handler"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/server"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
 )
+
+// @title Bloggy-backend
+// @version 1.0
+// @description backend for Bloggy (open source twitter-like app)
+
+// @host localhost:8000
+// @Basepath /
+
+// @securityDefinitions.apiKey ApiKeyAuth
+// @in header
+// @name Authorization
 
 func main() {
 

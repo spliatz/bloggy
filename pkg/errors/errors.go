@@ -20,8 +20,12 @@ func IsOneOf(err error, targets ...error) bool {
     return false
 }
 
+type ErrorResponse struct {
+    Error string
+}
+
 func NewHTTPError(c *gin.Context, status int, err error) {
-    c.AbortWithStatusJSON(status, gin.H{
-        "error": err.Error(),
+    c.AbortWithStatusJSON(status, ErrorResponse{
+        Error: err.Error(),
     })
 }

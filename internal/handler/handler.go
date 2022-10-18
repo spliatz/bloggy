@@ -2,6 +2,10 @@ package handler
 
 import (
     "github.com/gin-gonic/gin"
+    "github.com/swaggo/files"
+    "github.com/swaggo/gin-swagger"
+
+    _ "github.com/Intellect-Bloggy/bloggy-backend/docs"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
     a "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
@@ -73,6 +77,8 @@ func (h *Handlers) InitRoutes() *gin.Engine {
 
         post.GET("/:id", h.post.GetOneById)
     }
+
+    router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
     return router
 }
