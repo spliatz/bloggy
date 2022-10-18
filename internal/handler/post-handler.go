@@ -48,7 +48,7 @@ func (h *PostHandler) Create(c *gin.Context) {
     }
 
     i.AuthorId = userId.(int)
-    postId, err := h.postService.Create(i)
+    postId, err := h.postService.Create(c.Request.Context(), i)
     if err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
@@ -76,13 +76,13 @@ func (h *PostHandler) GetById(c *gin.Context) {
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
-        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
+        ResponseWithError(c, errors.ErrWrongId)
         return
     }
 
-    post, err := h.postService.GetById(postId)
+    post, err := h.postService.GetById(c.Request.Context(), postId)
     if err != nil {
-        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -104,9 +104,9 @@ func (h *PostHandler) GetById(c *gin.Context) {
 func (h *PostHandler) GetAllByUsername(c *gin.Context) {
     username := c.Param("username")
 
-    posts, err := h.postService.GetAllByUsername(username)
+    posts, err := h.postService.GetAllByUsername(c.Request.Context(), username)
     if err != nil {
-        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -131,11 +131,12 @@ type DeletePostResponse struct {
 // @Failure default {object} errors.ErrorResponse
 // @Router /post/{id} [delete]
 func (h *PostHandler) DeleteById(c *gin.Context) {
-    userId, exist := c.Get(userCtx)
+    userIdI, exist := c.Get(userCtx)
     if !exist {
         ResponseWithError(c, errors.ErrIdNotFound)
         return
     }
+    userId := userIdI.(int)
 
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
@@ -144,20 +145,25 @@ func (h *PostHandler) DeleteById(c *gin.Context) {
         return
     }
 
-    post, err := h.postService.GetById(postId)
+    post, err := h.postService.GetById(c.Request.Context(), postId)
     if err != nil {
         ResponseWithError(c, errors.ErrPostNotFound)
         return
     }
 
-    if post.UserId != userId {
+    isAuthor, err := h.postService.IsAuthor(c.Request.Context(), post.Id, userId)
+    if err != nil {
+        ResponseWithError(c, errors.EtoHe(err))
+        return
+    }
+    if !isAuthor {
         ResponseWithError(c, errors.ErrUserIsNotAuthor)
         return
     }
 
-    err = h.postService.DeleteById(postId)
+    err = h.postService.DeleteById(c.Request.Context(), postId)
     if err != nil {
-        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 

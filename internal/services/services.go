@@ -26,10 +26,11 @@ type Auth interface {
 }
 
 type Post interface {
-    Create(req CreatePostInput) (id int, err error)
-    GetById(id int) (post repository.Post, err error)
-    GetAllByUsername(username string) (posts []repository.Post, err error)
-    DeleteById(postId int) error
+    Create(ctx context.Context, input CreatePostInput) (id int, err error)
+    GetById(ctx context.Context, id int) (post PostResponse, err error)
+    GetAllByUsername(ctx context.Context, username string) (posts []PostResponse, err error)
+    DeleteById(ctx context.Context, postId int) error
+    IsAuthor(ctx context.Context, postId int, authorId int) (bool, error)
 }
 
 func NewServices(repos *repository.Repository, hasher hash.PasswordHasher, tokenManager auth.TokenManager) *Services {

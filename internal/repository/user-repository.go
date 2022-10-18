@@ -151,3 +151,23 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (Us
 
     return user, nil
 }
+
+func (r *UserRepository) GetById(ctx context.Context, id int) (User, error) {
+    user := User{}
+
+    err := r.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id, username, name, birthday, email, phone, created_at
+        FROM %s
+        WHERE id = $1
+    `, usersTable), id).Scan(
+        &user.Id, &user.Username, &user.Name, &user.Birthday,
+        &user.Email, &user.Phone, &user.CreatedAt)
+    if errors.Is(err, pgx.ErrNoRows) {
+        return User{}, e.ErrIdNotFound
+    }
+    if err != nil {
+        return User{}, err
+    }
+
+    return user, nil
+}
