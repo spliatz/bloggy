@@ -3,7 +3,6 @@ module github.com/Intellect-Bloggy/bloggy-backend
 go 1.19
 
 require (
-	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/gin-gonic/gin v1.8.1
 	github.com/golang-jwt/jwt/v4 v4.4.2
 	github.com/jackc/pgx/v5 v5.0.2
@@ -11,6 +10,10 @@ require (
 	github.com/swaggo/files v0.0.0-20220728132757-551d4a08d97a
 	github.com/swaggo/gin-swagger v1.5.3
 	github.com/swaggo/swag v1.8.7
+)
+
+require (
+	github.com/KyleBanks/depth v1.2.1 // indirect
 	github.com/gin-contrib/sse v0.1.0 // indirect
 	github.com/go-openapi/jsonpointer v0.19.5 // indirect
 	github.com/go-openapi/jsonreference v0.20.0 // indirect

@@ -2,12 +2,13 @@ package services
 
 import (
     "context"
+    "errors"
     "strconv"
     "time"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/utils"
     "github.com/jackc/pgx/v5/pgtype"
@@ -125,7 +126,7 @@ func (s *AuthService) SignIn(ctx context.Context, i SignInInput) (Tokens, error)
 func (s *AuthService) RefreshTokens(ctx context.Context, refreshToken string) (Tokens, error) {
     err := s.repos.CheckRefresh(ctx, refreshToken)
     if err != nil {
-        if errors.Is(err, errors.ErrTokenExpired) {
+        if errors.Is(err, e.ErrTokenExpired) {
             if err := s.repos.DeleteRefresh(ctx, refreshToken); err != nil {
                 return Tokens{}, err
             }

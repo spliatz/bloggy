@@ -2,10 +2,14 @@ package errors
 
 import (
     "errors"
+    "net/http"
 )
 
-var ErrWrongPassOrUsername = errors.New("wrong username or password")
-var ErrShortPass = errors.New("password must be at least 8 characters")
-var ErrSimplePass = errors.New("password must contain a mix of letters, numbers, and symbols")
-var ErrTokenExpired = errors.New("token expired")
-var WrongToken = errors.New("token not found")
+var (
+    ErrTokenExpired  = NewHTTPError(http.StatusUnauthorized, errors.New("token expired"))
+    ErrTokenNotFound = NewHTTPError(http.StatusUnauthorized, errors.New("token does not exist"))
+
+    ErrWrongCredentials = NewHTTPError(http.StatusBadRequest, errors.New("wrong username or password"))
+    ErrShortPass        = NewHTTPError(http.StatusBadRequest, errors.New("password must be at least 8 characters"))
+    ErrSimplePass       = NewHTTPError(http.StatusBadRequest, errors.New("password must contain a mix of letters, numbers, and symbols"))
+)

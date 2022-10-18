@@ -7,7 +7,7 @@ import (
     "github.com/gin-gonic/gin"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
-    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 type PostHandler struct {
@@ -36,21 +36,21 @@ func newPostHandler(sp services.Post) *PostHandler {
 func (h *PostHandler) Create(c *gin.Context) {
     userId, exist := c.Get(userCtx)
     if !exist {
-        e.NewHTTPError(c, http.StatusNotFound, e.ErrUserDoesNotExist)
+        ResponseWithError(c, errors.ErrIdNotFound)
         return
     }
 
-    var createRequest services.CreatePostInput
-    err := c.BindJSON(&createRequest)
+    var i services.CreatePostInput
+    err := c.BindJSON(&i)
     if err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, e.ErrContentNotFound)
+        ResponseWithError(c, errors.ErrEmptyContent)
         return
     }
 
-    createRequest.UserId = userId.(int)
-    postId, err := h.postService.Create(createRequest)
+    i.AuthorId = userId.(int)
+    postId, err := h.postService.Create(i)
     if err != nil {
-        e.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
     }
 
@@ -76,13 +76,13 @@ func (h *PostHandler) GetOneById(c *gin.Context) {
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
         return
     }
 
     post, err := h.postService.GetOneById(postId)
     if err != nil {
-        e.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
     }
 
@@ -106,7 +106,7 @@ func (h *PostHandler) GetAllUserPosts(c *gin.Context) {
 
     posts, err := h.postService.GetAllUserPosts(username)
     if err != nil {
-        e.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
     }
 
@@ -133,31 +133,31 @@ type DeletePostResponse struct {
 func (h *PostHandler) DeleteById(c *gin.Context) {
     userId, exist := c.Get(userCtx)
     if !exist {
-        e.NewHTTPError(c, http.StatusBadRequest, e.ErrUserDoesNotExist)
+        ResponseWithError(c, errors.ErrIdNotFound)
         return
     }
 
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, e.ErrInvalidPostId)
+        ResponseWithError(c, errors.ErrInvalidPostId)
         return
     }
 
     post, err := h.postService.GetOneById(postId)
     if err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, e.ErrPostNotFound)
+        ResponseWithError(c, errors.ErrPostNotFound)
         return
     }
 
     if post.UserId != userId {
-        e.NewHTTPError(c, http.StatusUnauthorized, e.ErrUserIsNotAuthor)
+        ResponseWithError(c, errors.ErrUserIsNotAuthor)
         return
     }
 
     err = h.postService.DeleteById(postId)
     if err != nil {
-        e.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
     }
 

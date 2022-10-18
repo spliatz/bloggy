@@ -42,22 +42,13 @@ type tokenResponse struct {
 func (h *authHandler) signUp(c *gin.Context) {
     var i services.SignUpInput
     if err := c.BindJSON(&i); err != nil {
-        errors.NewHTTPError(c, http.StatusBadRequest, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
         return
     }
 
     t, err := h.authService.SignUp(c.Request.Context(), i)
     if err != nil {
-        if errors.IsOneOf(
-            err,
-            errors.ErrShortPass, errors.ErrSimplePass, errors.ErrWrongUsername,
-            errors.ErrWrongUsernameLength, errors.ErrTakenUsername, errors.ErrWrongDateFormat,
-        ) {
-            errors.NewHTTPError(c, http.StatusBadRequest, err)
-            return
-        }
-
-        errors.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -79,21 +70,13 @@ func (h *authHandler) signUp(c *gin.Context) {
 func (h *authHandler) signIn(c *gin.Context) {
     var i services.SignInInput
     if err := c.BindJSON(&i); err != nil {
-        errors.NewHTTPError(c, http.StatusBadRequest, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
         return
     }
 
     res, err := h.authService.SignIn(c.Request.Context(), i)
-    if errors.Is(err, errors.ErrWrongPassOrUsername) {
-        errors.NewHTTPError(c, http.StatusBadRequest, err)
-        return
-    }
-    if errors.Is(err, errors.ErrTokenExpired) {
-        errors.NewHTTPError(c, http.StatusUnauthorized, err)
-        return
-    }
     if err != nil {
-        errors.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -119,21 +102,13 @@ type refreshInput struct {
 func (h *authHandler) refresh(c *gin.Context) {
     var i refreshInput
     if err := c.BindJSON(&i); err != nil {
-        errors.NewHTTPError(c, http.StatusBadRequest, err)
+        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
         return
     }
 
     res, err := h.authService.RefreshTokens(c.Request.Context(), i.Token)
-    if errors.Is(err, errors.WrongToken) {
-        errors.NewHTTPError(c, http.StatusBadRequest, err)
-        return
-    }
-    if errors.Is(err, errors.ErrTokenExpired) {
-        errors.NewHTTPError(c, http.StatusUnauthorized, err)
-        return
-    }
     if err != nil {
-        errors.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 

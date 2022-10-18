@@ -2,10 +2,11 @@ package repository
 
 import (
     "context"
+    "errors"
     "fmt"
     "strings"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
     "github.com/jackc/pgx/v5"
 )
 
@@ -29,7 +30,7 @@ func (r *UserRepository) EditById(ctx context.Context, id int, req map[string]st
     `, usersTable), req["username"]).Scan(&_id)
     if err == nil {
         // Если он нашел пользователя и успешно просканировал, то он существует
-        return User{}, errors.ErrTakenUsername
+        return User{}, e.ErrTakenUsername
     }
     if !errors.Is(err, pgx.ErrNoRows) {
         // Если ошибка не является ошибкой "Не найден пользователь"
@@ -44,7 +45,7 @@ func (r *UserRepository) EditById(ctx context.Context, id int, req map[string]st
     `, usersTable), req["email"]).Scan(&_id)
     if err == nil {
         // Если он нашел пользователя и успешно просканировал, то он существует
-        return User{}, errors.ErrTakenEmail
+        return User{}, e.ErrTakenEmail
     }
     if !errors.Is(err, pgx.ErrNoRows) {
         // Если ошибка не является ошибкой "Не найден пользователь"
@@ -59,7 +60,7 @@ func (r *UserRepository) EditById(ctx context.Context, id int, req map[string]st
     `, usersTable), req["phone"]).Scan(&_id)
     if err == nil {
         // Если он нашел пользователя и успешно просканировал, то он существует
-        return User{}, errors.ErrTakenPhone
+        return User{}, e.ErrTakenPhone
     }
     if !errors.Is(err, pgx.ErrNoRows) {
         // Если ошибка не является ошибкой "Не найден пользователь"
@@ -100,7 +101,7 @@ func (r *UserRepository) GetByRefreshToken(ctx context.Context, refreshToken str
         &user.Id, &user.Username, &user.Name, &user.Birthday,
         &user.Email, &user.Phone, &user.CreatedAt)
     if errors.Is(err, pgx.ErrNoRows) {
-        return User{}, errors.ErrUsernameNotFound
+        return User{}, e.ErrUsernameNotFound
     }
     if err != nil {
         return User{}, err
@@ -122,7 +123,7 @@ func (r *UserRepository) GetByCredentials(ctx context.Context, username string, 
         &user.Id, &user.Username, &user.Name, &user.Birthday,
         &user.Email, &user.Phone, &user.CreatedAt)
     if errors.Is(err, pgx.ErrNoRows) {
-        return User{}, errors.ErrWrongPassOrUsername
+        return User{}, e.ErrWrongCredentials
     }
     if err != nil {
         return User{}, err
@@ -142,7 +143,7 @@ func (r *UserRepository) GetByUsername(ctx context.Context, username string) (Us
         &user.Id, &user.Username, &user.Name, &user.Birthday,
         &user.Email, &user.Phone, &user.CreatedAt)
     if errors.Is(err, pgx.ErrNoRows) {
-        return User{}, errors.ErrUsernameNotFound
+        return User{}, e.ErrUsernameNotFound
     }
     if err != nil {
         return User{}, err

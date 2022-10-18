@@ -2,13 +2,14 @@ package repository
 
 import (
     "context"
+    "errors"
     "fmt"
     "time"
 
     "github.com/jackc/pgx/v5"
     "github.com/jackc/pgx/v5/pgtype"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 type AuthRepository struct {
@@ -42,7 +43,7 @@ func (r *AuthRepository) SignUp(ctx context.Context, u User) (User, error) {
     `, usersTable), u.Username).Scan(&_id)
     if err == nil {
         // Если он нашел пользователя и успешно просканировал, то он существует
-        return User{}, errors.ErrTakenUsername
+        return User{}, e.ErrTakenUsername
     }
     if !errors.Is(err, pgx.ErrNoRows) {
         // Если ошибка не является ошибкой "Не найден пользователь"
@@ -111,7 +112,7 @@ func (r *AuthRepository) CheckRefresh(ctx context.Context, refreshToken string) 
     `, refreshTable), refreshToken).Scan(&expiresAt)
     if err != nil {
         if errors.Is(err, pgx.ErrNoRows) {
-            return errors.WrongToken
+            return e.ErrTokenNotFound
         }
 
         return err
@@ -119,7 +120,7 @@ func (r *AuthRepository) CheckRefresh(ctx context.Context, refreshToken string) 
 
     if expiresAt.Valid {
         if time.Now().After(expiresAt.Time) {
-            return errors.ErrTokenExpired
+            return e.ErrTokenExpired
         }
     }
 
@@ -136,7 +137,7 @@ func (r *AuthRepository) DeleteRefresh(ctx context.Context, refreshToken string)
         return err
     }
     if errors.Is(err, pgx.ErrNoRows) {
-        return errors.WrongToken
+        return e.ErrTokenNotFound
     }
 
     return nil

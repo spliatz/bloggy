@@ -2,9 +2,14 @@ package errors
 
 import (
     "errors"
+    "net/http"
 )
 
-var ErrContentNotFound = errors.New("content is required option")
-var ErrPostNotFound = errors.New("post does not exist")
-var ErrUserIsNotAuthor = errors.New("post can be deleted only by author")
-var ErrInvalidPostId = errors.New("invalid post id")
+var (
+    ErrPostNotFound = NewHTTPError(http.StatusNotFound, errors.New("post does not exist"))
+
+    ErrUserIsNotAuthor = NewHTTPError(http.StatusForbidden, errors.New("the user is not the author of the post"))
+
+    ErrEmptyContent  = NewHTTPError(http.StatusBadRequest, errors.New("content must be not empty"))
+    ErrInvalidPostId = NewHTTPError(http.StatusBadRequest, errors.New("invalid post id"))
+)

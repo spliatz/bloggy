@@ -56,7 +56,7 @@ func (r *PostRepository) GetAllUserPosts(username string) ([]Post, error) {
     err := r.db.QueryRow(context.Background(), fmt.Sprintf(
         `SELECT id FROM %s WHERE username = $1`, usersTable), username).Scan(&userId)
     if err != nil {
-        return nil, errors.ErrUserDoesNotExist
+        return nil, errors.ErrUsernameNotFound
     }
 
     // получаем все посты полученного юзера

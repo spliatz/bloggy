@@ -4,7 +4,7 @@ import (
     "net/http"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
-    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 
     "github.com/gin-gonic/gin"
 )
@@ -36,16 +36,8 @@ func (h *UserHandler) getUserByUsername(c *gin.Context) {
     username := c.Param("username")
 
     user, err := h.userService.GetUserByUsername(c.Request.Context(), username)
-    if e.Is(err, e.ErrWrongUsername) {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
-        return
-    }
-    if e.Is(err, e.ErrUsernameNotFound) {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
-        return
-    }
     if err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -69,32 +61,20 @@ func (h *UserHandler) editUser(c *gin.Context) {
     c.Set("user_id", 1)
     userIdI, exist := c.Get("user_id")
     if !exist {
-        e.NewHTTPError(c, http.StatusBadRequest, e.ErrUserDoesNotExist)
+        ResponseWithError(c, errors.ErrIdNotFound)
         return
     }
     userId, _ := userIdI.(int)
 
-    eReq := services.EditInput{}
-    if err := c.BindJSON(&eReq); err != nil {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
+    i := services.EditInput{}
+    if err := c.BindJSON(&i); err != nil {
+        ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
         return
     }
 
-    user, err := h.userService.EditById(c.Request.Context(), userId, eReq)
-    if e.IsOneOf(
-        err,
-        e.ErrTakenUsername, e.ErrTakenEmail, e.ErrTakenPhone,
-        e.ErrWrongNameLength, e.ErrWrongName,
-    ) {
-        e.NewHTTPError(c, http.StatusBadRequest, err)
-        return
-    }
-    if e.Is(err, e.ErrIdNotFound) {
-        e.NewHTTPError(c, http.StatusNotFound, err)
-        return
-    }
+    user, err := h.userService.EditById(c.Request.Context(), userId, i)
     if err != nil {
-        e.NewHTTPError(c, http.StatusInternalServerError, err)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 

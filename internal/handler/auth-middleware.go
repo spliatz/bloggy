@@ -20,7 +20,7 @@ const (
 func (h *authHandler) userIdentity(c *gin.Context) {
     id, err := h.parseAuthHeader(c)
     if err != nil {
-        e.NewHTTPError(c, http.StatusUnauthorized, err)
+        ResponseWithError(c, e.NewHTTPError(http.StatusUnauthorized, err))
         return
     }
 
