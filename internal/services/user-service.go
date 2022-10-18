@@ -29,7 +29,7 @@ type UserResponse struct {
     CreatedAt time.Time `json:"created_at"`
 }
 
-func (s *UserService) GetUserByUsername(ctx context.Context, username string) (UserResponse, error) {
+func (s *UserService) GetByUsername(ctx context.Context, username string) (UserResponse, error) {
     if err := utils.CheckUsername(username); err != nil {
         return UserResponse{}, err
     }

@@ -32,10 +32,10 @@ func newUserHandler(userService services.User) *UserHandler {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /user/{username} [get]
-func (h *UserHandler) getUserByUsername(c *gin.Context) {
+func (h *UserHandler) GetByUsername(c *gin.Context) {
     username := c.Param("username")
 
-    user, err := h.userService.GetUserByUsername(c.Request.Context(), username)
+    user, err := h.userService.GetByUsername(c.Request.Context(), username)
     if err != nil {
         ResponseWithError(c, errors.EtoHe(err))
         return
@@ -57,8 +57,7 @@ func (h *UserHandler) getUserByUsername(c *gin.Context) {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /user [patch]
-func (h *UserHandler) editUser(c *gin.Context) {
-    c.Set("user_id", 1)
+func (h *UserHandler) EditById(c *gin.Context) {
     userIdI, exist := c.Get("user_id")
     if !exist {
         ResponseWithError(c, errors.ErrIdNotFound)

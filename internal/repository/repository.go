@@ -29,14 +29,14 @@ type UserRepo interface {
 type Auth interface {
     SignUp(ctx context.Context, u User) (User, error)
     SetSession(ctx context.Context, userId int, s Session) error
-    CheckRefresh(ctx context.Context, refresh string) error
+    CheckRefresh(ctx context.Context, refreshToken string) error
     DeleteRefresh(ctx context.Context, refreshToken string) error
 }
 
 type PostRepo interface {
-    Create(req Post) (int, error)
-    GetOneById(id int) (Post, error)
-    GetAllUserPosts(username string) ([]Post, error)
+    Create(req Post) (id int, err error)
+    GetById(id int) (Post, error)
+    GetAllByUsername(username string) ([]Post, error)
     DeleteById(id int) error
 }
 

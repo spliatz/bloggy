@@ -72,7 +72,7 @@ func (h *PostHandler) Create(c *gin.Context) {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /post/{id} [get]
-func (h *PostHandler) GetOneById(c *gin.Context) {
+func (h *PostHandler) GetById(c *gin.Context) {
     id := c.Param("id")
     postId, err := strconv.Atoi(id)
     if err != nil {
@@ -80,7 +80,7 @@ func (h *PostHandler) GetOneById(c *gin.Context) {
         return
     }
 
-    post, err := h.postService.GetOneById(postId)
+    post, err := h.postService.GetById(postId)
     if err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
@@ -101,10 +101,10 @@ func (h *PostHandler) GetOneById(c *gin.Context) {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /user/{username}/posts [get]
-func (h *PostHandler) GetAllUserPosts(c *gin.Context) {
+func (h *PostHandler) GetAllByUsername(c *gin.Context) {
     username := c.Param("username")
 
-    posts, err := h.postService.GetAllUserPosts(username)
+    posts, err := h.postService.GetAllByUsername(username)
     if err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
         return
@@ -144,7 +144,7 @@ func (h *PostHandler) DeleteById(c *gin.Context) {
         return
     }
 
-    post, err := h.postService.GetOneById(postId)
+    post, err := h.postService.GetById(postId)
     if err != nil {
         ResponseWithError(c, errors.ErrPostNotFound)
         return

@@ -40,7 +40,7 @@ func (r *PostRepository) Create(req Post) (int, error) {
     return postId, nil
 }
 
-func (r *PostRepository) GetOneById(id int) (Post, error) {
+func (r *PostRepository) GetById(id int) (Post, error) {
     var post Post
     err := r.db.QueryRow(context.Background(),
         fmt.Sprintf(`SELECT id, author_id, content, created_at FROM %s WHERE id = $1`, postsTable),
@@ -49,7 +49,7 @@ func (r *PostRepository) GetOneById(id int) (Post, error) {
     return post, err
 }
 
-func (r *PostRepository) GetAllUserPosts(username string) ([]Post, error) {
+func (r *PostRepository) GetAllByUsername(username string) ([]Post, error) {
 
     // получаем юзера
     var userId int

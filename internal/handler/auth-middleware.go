@@ -17,7 +17,7 @@ const (
     userCtx = "user_id"
 )
 
-func (h *authHandler) userIdentity(c *gin.Context) {
+func (h *authHandler) UserIdentity(c *gin.Context) {
     id, err := h.parseAuthHeader(c)
     if err != nil {
         ResponseWithError(c, e.NewHTTPError(http.StatusUnauthorized, err))

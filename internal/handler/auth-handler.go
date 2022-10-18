@@ -39,7 +39,7 @@ type tokenResponse struct {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /auth/signup [post]
-func (h *authHandler) signUp(c *gin.Context) {
+func (h *authHandler) SignUp(c *gin.Context) {
     var i services.SignUpInput
     if err := c.BindJSON(&i); err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
@@ -67,7 +67,7 @@ func (h *authHandler) signUp(c *gin.Context) {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /auth/signin [post]
-func (h *authHandler) signIn(c *gin.Context) {
+func (h *authHandler) SignIn(c *gin.Context) {
     var i services.SignInInput
     if err := c.BindJSON(&i); err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
@@ -99,7 +99,7 @@ type refreshInput struct {
 // @Failure 500 {object} errors.ErrorResponse
 // @Failure default {object} errors.ErrorResponse
 // @Router /auth/refresh [post]
-func (h *authHandler) refresh(c *gin.Context) {
+func (h *authHandler) Refresh(c *gin.Context) {
     var i refreshInput
     if err := c.BindJSON(&i); err != nil {
         ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))

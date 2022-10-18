@@ -17,17 +17,17 @@ func newPostService(repos *repository.Repository) *PostService {
 }
 
 type CreatePostInput struct {
-    Content string `json:"content" binding:"required"`
-    UserId  int    `json:"author_id"`
+    Content  string `json:"content" binding:"required"`
+    AuthorId int    `json:"author_id"`
 }
 
 func (s *PostService) Create(req CreatePostInput) (int, error) {
-    createdAt := time.Now()
     post := repository.Post{
         Content:   req.Content,
-        CreatedAt: createdAt,
-        UserId:    req.UserId,
+        CreatedAt: time.Now(),
+        UserId:    req.AuthorId,
     }
+
     id, err := s.repos.PostRepo.Create(post)
     if err != nil {
         return 0, err
@@ -36,12 +36,12 @@ func (s *PostService) Create(req CreatePostInput) (int, error) {
     return id, nil
 }
 
-func (s *PostService) GetOneById(id int) (repository.Post, error) {
-    return s.repos.PostRepo.GetOneById(id)
+func (s *PostService) GetById(id int) (repository.Post, error) {
+    return s.repos.PostRepo.GetById(id)
 }
 
-func (s *PostService) GetAllUserPosts(username string) ([]repository.Post, error) {
-    return s.repos.GetAllUserPosts(username)
+func (s *PostService) GetAllByUsername(username string) ([]repository.Post, error) {
+    return s.repos.GetAllByUsername(username)
 }
 
 func (s *PostService) DeleteById(postId int) error {

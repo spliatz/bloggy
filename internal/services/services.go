@@ -15,7 +15,7 @@ type Services struct {
 }
 
 type User interface {
-    GetUserByUsername(ctx context.Context, username string) (UserResponse, error)
+    GetByUsername(ctx context.Context, username string) (UserResponse, error)
     EditById(ctx context.Context, id int, input EditInput) (UserResponse, error)
 }
 
@@ -27,8 +27,8 @@ type Auth interface {
 
 type Post interface {
     Create(req CreatePostInput) (id int, err error)
-    GetOneById(id int) (repository.Post, error)
-    GetAllUserPosts(username string) ([]repository.Post, error)
+    GetById(id int) (post repository.Post, err error)
+    GetAllByUsername(username string) (posts []repository.Post, err error)
     DeleteById(postId int) error
 }
 

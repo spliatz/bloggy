@@ -18,23 +18,23 @@ type Handlers struct {
 }
 
 type user interface {
-    getUserByUsername(ctx *gin.Context)
-    editUser(ctx *gin.Context)
+    GetByUsername(ctx *gin.Context)
+    EditById(ctx *gin.Context)
 }
 
 type auth interface {
-    signUp(ctx *gin.Context)
-    signIn(ctx *gin.Context)
-    refresh(ctx *gin.Context)
+    SignUp(ctx *gin.Context)
+    SignIn(ctx *gin.Context)
+    Refresh(ctx *gin.Context)
 
     // Middlewares
-    userIdentity(ctx *gin.Context)
+    UserIdentity(ctx *gin.Context)
 }
 
 type post interface {
     Create(c *gin.Context)
-    GetOneById(c *gin.Context)
-    GetAllUserPosts(c *gin.Context)
+    GetById(c *gin.Context)
+    GetAllByUsername(c *gin.Context)
     DeleteById(c *gin.Context)
 }
 
@@ -51,31 +51,31 @@ func (h *Handlers) InitRoutes() *gin.Engine {
 
     auth := router.Group("/auth")
     {
-        auth.POST("/signup", h.signUp)
-        auth.POST("/signin", h.signIn)
-        auth.POST("/refresh", h.refresh)
+        auth.POST("/signup", h.auth.SignUp)
+        auth.POST("/signin", h.auth.SignIn)
+        auth.POST("/refresh", h.auth.Refresh)
     }
 
     user := router.Group("/user")
     {
-        authProtectedUsers := user.Group("", h.userIdentity)
+        authProtectedUsers := user.Group("", h.auth.UserIdentity)
         {
-            authProtectedUsers.PATCH("", h.editUser)
-            authProtectedUsers.GET("/:username", h.getUserByUsername)
+            authProtectedUsers.PATCH("", h.user.EditById)
         }
 
-        user.GET("/:username/posts", h.post.GetAllUserPosts)
+        user.GET("/:username", h.user.GetByUsername)
+        user.GET("/:username/posts", h.post.GetAllByUsername)
     }
 
     post := router.Group("/post")
     {
-        authProtectedPost := post.Group("", h.userIdentity)
+        authProtectedPost := post.Group("", h.auth.UserIdentity)
         {
             authProtectedPost.POST("", h.post.Create)
             authProtectedPost.DELETE("/:id", h.post.DeleteById)
         }
 
-        post.GET("/:id", h.post.GetOneById)
+        post.GET("/:id", h.post.GetById)
     }
 
     router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
