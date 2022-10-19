@@ -54,6 +54,7 @@ func (r *AuthRepository) SignUp(ctx context.Context, u User) (User, error) {
 
     newU := User{}
 
+    // FIXME: Тут нет проверки занятости email и phone
     // Создание пользователя
     err = tx.QueryRow(ctx, fmt.Sprintf(`
         INSERT INTO %s (username, name, email, phone, birthday, created_at)

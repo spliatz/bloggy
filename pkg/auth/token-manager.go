@@ -6,6 +6,7 @@ import (
     "math/rand"
     "time"
 
+    e "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
     "github.com/golang-jwt/jwt/v4"
 )
 
@@ -45,6 +46,10 @@ func (m *Manager) Parse(accessToken string) (string, error) {
         return []byte(m.signingKey), nil
     })
     if err != nil {
+        if errors.Is(err, jwt.ErrTokenExpired) {
+            return "", e.ErrTokenExpired
+        }
+
         return "", err
     }
 

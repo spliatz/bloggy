@@ -28,9 +28,9 @@ func newUserHandler(userService services.User) *UserHandler {
 // @Produce json
 // @Param username path string true "User username"
 // @Success 200 {object} services.UserResponse
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /user/{username} [get]
 func (h *UserHandler) GetByUsername(c *gin.Context) {
     username := c.Param("username")
@@ -51,11 +51,11 @@ func (h *UserHandler) GetByUsername(c *gin.Context) {
 // @ID edit-user-by-username
 // @Accept json
 // @Produce json
-// @Success 200 {object} services.UserResponse
 // @Param input body services.EditInput true "user information"
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 200 {object} services.UserResponse
+// @Failure 400,401,403,404,409 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /user [patch]
 func (h *UserHandler) EditById(c *gin.Context) {
     userIdI, exist := c.Get("user_id")

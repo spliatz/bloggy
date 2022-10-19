@@ -20,7 +20,7 @@ const (
 func (h *authHandler) UserIdentity(c *gin.Context) {
     id, err := h.parseAuthHeader(c)
     if err != nil {
-        ResponseWithError(c, e.NewHTTPError(http.StatusUnauthorized, err))
+        ResponseWithError(c, e.EtoHe(err))
         return
     }
 
@@ -30,16 +30,16 @@ func (h *authHandler) UserIdentity(c *gin.Context) {
 func (h *authHandler) parseAuthHeader(c *gin.Context) (int, error) {
     header := c.GetHeader(authorizationHeader)
     if header == "" {
-        return 0, errors.New("empty auth header")
+        return 0, e.NewHTTPError(http.StatusUnauthorized, errors.New("empty auth header"))
     }
 
     headerParts := strings.Split(header, " ")
     if len(headerParts) != 2 || headerParts[0] != "Bearer" {
-        return 0, errors.New("invalid auth header")
+        return 0, e.NewHTTPError(http.StatusBadRequest, errors.New("invalid auth header"))
     }
 
     if len(headerParts[1]) == 0 {
-        return 0, errors.New("token is empty")
+        return 0, e.NewHTTPError(http.StatusUnauthorized, errors.New("token is empty"))
     }
 
     idS, err := h.tokenManager.Parse(headerParts[1])

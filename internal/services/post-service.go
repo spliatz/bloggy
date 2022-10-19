@@ -5,6 +5,7 @@ import (
     "time"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/utils"
 )
 
 type PostService struct {
@@ -62,6 +63,11 @@ func (s *PostService) GetById(c context.Context, id int) (PostResponse, error) {
 }
 
 func (s *PostService) GetAllByUsername(c context.Context, username string) ([]PostResponse, error) {
+    err := utils.CheckUsername(username)
+    if err != nil {
+        return make([]PostResponse, 0), err
+    }
+
     posts, err := s.repos.PostRepo.GetAllByUsername(c, username)
     if err != nil {
         return make([]PostResponse, 0), err

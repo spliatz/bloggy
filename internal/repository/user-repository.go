@@ -101,7 +101,7 @@ func (r *UserRepository) GetByRefreshToken(ctx context.Context, refreshToken str
         &user.Id, &user.Username, &user.Name, &user.Birthday,
         &user.Email, &user.Phone, &user.CreatedAt)
     if errors.Is(err, pgx.ErrNoRows) {
-        return User{}, e.ErrUsernameNotFound
+        return User{}, e.ErrUserNotFound
     }
     if err != nil {
         return User{}, err

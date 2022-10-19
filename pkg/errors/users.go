@@ -6,6 +6,7 @@ import (
 )
 
 var (
+    ErrUserNotFound     = NewHTTPError(http.StatusNotFound, errors.New("user does not exits"))
     ErrUsernameNotFound = NewHTTPError(http.StatusNotFound, errors.New("user with this username does not exist"))
     ErrIdNotFound       = NewHTTPError(http.StatusNotFound, errors.New("id does not exist"))
 
@@ -16,7 +17,7 @@ var (
     ErrWrongId             = NewHTTPError(http.StatusBadRequest, errors.New("id must be non negative integer"))
     ErrWrongDateFormat     = NewHTTPError(http.StatusBadRequest, errors.New(`date must be "2000-12-31" format`))
 
-    ErrTakenUsername = NewHTTPError(http.StatusBadRequest, errors.New("user with this username already exists"))
-    ErrTakenEmail    = NewHTTPError(http.StatusBadRequest, errors.New("user with this email already exists"))
-    ErrTakenPhone    = NewHTTPError(http.StatusBadRequest, errors.New("user with this phone already exists"))
+    ErrTakenUsername = NewHTTPError(http.StatusConflict, errors.New("user with this username already exists"))
+    ErrTakenEmail    = NewHTTPError(http.StatusConflict, errors.New("user with this email already exists"))
+    ErrTakenPhone    = NewHTTPError(http.StatusConflict, errors.New("user with this phone already exists"))
 )

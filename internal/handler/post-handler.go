@@ -27,11 +27,11 @@ func newPostHandler(sp services.Post) *PostHandler {
 // @ID create-post
 // @Accept json
 // @Produce json
-// @Success 200 {integer} integer 1
 // @Param input body services.CreatePostInput true "post information"
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 201 {object} IdResponse
+// @Failure 400,401,403,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /post [post]
 func (h *PostHandler) Create(c *gin.Context) {
     userId, exist := c.Get(userCtx)
@@ -50,13 +50,11 @@ func (h *PostHandler) Create(c *gin.Context) {
     i.AuthorId = userId.(int)
     postId, err := h.postService.Create(c.Request.Context(), i)
     if err != nil {
-        ResponseWithError(c, errors.NewHTTPError(http.StatusInternalServerError, err))
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
-    c.JSON(http.StatusCreated, gin.H{
-        "id": postId,
-    })
+    c.JSON(http.StatusCreated, IdResponse{postId})
 
 }
 
@@ -66,11 +64,11 @@ func (h *PostHandler) Create(c *gin.Context) {
 // @ID get-post-by-id
 // @Accept json
 // @Produce json
-// @Success 200 {integer} integer 1
-// @Param        id   path      int  true  "Post ID"
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Param id path int true "Post ID"
+// @Success 200 {object} services.PostResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /post/{id} [get]
 func (h *PostHandler) GetById(c *gin.Context) {
     id := c.Param("id")
@@ -89,17 +87,17 @@ func (h *PostHandler) GetById(c *gin.Context) {
     c.JSON(http.StatusOK, post)
 }
 
-// @Summary GetAllUserPosts
+// @Summary GetAllByUsername
 // @Tags post
 // @Description Get All User's Posts
-// @ID get-all-user-posts
+// @ID get-all-by-username
 // @Accept json
 // @Produce json
-// @Success 200 {array} []repository.Post
 // @Param username path string true "User username"
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 200 {array} services.PostResponse
+// @Failure 400,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /user/{username}/posts [get]
 func (h *PostHandler) GetAllByUsername(c *gin.Context) {
     username := c.Param("username")
@@ -113,10 +111,6 @@ func (h *PostHandler) GetAllByUsername(c *gin.Context) {
     c.JSON(http.StatusOK, posts)
 }
 
-type DeletePostResponse struct {
-    Ok bool `json:"ok"`
-}
-
 // @Summary DeleteById
 // @Tags post
 // @Description delete one post by id
@@ -124,11 +118,11 @@ type DeletePostResponse struct {
 // @ID delete-post-by-id
 // @Accept json
 // @Produce json
-// @Success 200 {object} DeletePostResponse
-// @Param        id   path      int  true  "Post ID"
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Param id path int true "Post ID"
+// @Success 200 {object} EmptyResponse
+// @Failure 400,401,403,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /post/{id} [delete]
 func (h *PostHandler) DeleteById(c *gin.Context) {
     userIdI, exist := c.Get(userCtx)
@@ -147,7 +141,7 @@ func (h *PostHandler) DeleteById(c *gin.Context) {
 
     post, err := h.postService.GetById(c.Request.Context(), postId)
     if err != nil {
-        ResponseWithError(c, errors.ErrPostNotFound)
+        ResponseWithError(c, errors.EtoHe(err))
         return
     }
 
@@ -167,7 +161,5 @@ func (h *PostHandler) DeleteById(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, DeletePostResponse{
-        Ok: true,
-    })
+    c.JSON(http.StatusOK, EmptyResponse{})
 }

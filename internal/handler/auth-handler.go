@@ -22,11 +22,6 @@ func newAuthHandler(s services.Auth, t a.TokenManager) *authHandler {
     }
 }
 
-type tokenResponse struct {
-    Access  string `json:"access_token"`
-    Refresh string `json:"refresh_token"`
-}
-
 // @Summary SignUp
 // @Tags auth
 // @Description create account
@@ -34,10 +29,10 @@ type tokenResponse struct {
 // @Accept json
 // @Produce json
 // @Param input body services.SignUpInput true "account info"
-// @Success 201 {object} tokenResponse
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 201 {object} TokenResponse
+// @Failure 400,409 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /auth/signup [post]
 func (h *authHandler) SignUp(c *gin.Context) {
     var i services.SignUpInput
@@ -52,7 +47,7 @@ func (h *authHandler) SignUp(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusCreated, tokenResponse{t.Access, t.Refresh})
+    c.JSON(http.StatusCreated, TokenResponse{t.Access, t.Refresh})
 }
 
 // @Summary SignIn
@@ -62,10 +57,10 @@ func (h *authHandler) SignUp(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body services.SignInInput true "account username and password"
-// @Success 201 {object} tokenResponse
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 200 {object} TokenResponse
+// @Failure 400,403 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /auth/signin [post]
 func (h *authHandler) SignIn(c *gin.Context) {
     var i services.SignInInput
@@ -80,7 +75,7 @@ func (h *authHandler) SignIn(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, tokenResponse{res.Access, res.Refresh})
+    c.JSON(http.StatusOK, TokenResponse{res.Access, res.Refresh})
 }
 
 type refreshInput struct {
@@ -94,10 +89,10 @@ type refreshInput struct {
 // @Accept json
 // @Produce json
 // @Param input body refreshInput true "refresh token"
-// @Success 201 {object} tokenResponse
-// @Failure 400 {object} errors.ErrorResponse
-// @Failure 500 {object} errors.ErrorResponse
-// @Failure default {object} errors.ErrorResponse
+// @Success 200 {object} TokenResponse
+// @Failure 400,403,404 {object} ErrorResponse
+// @Failure 500 {object} ErrorResponse
+// @Failure default {object} ErrorResponse
 // @Router /auth/refresh [post]
 func (h *authHandler) Refresh(c *gin.Context) {
     var i refreshInput
@@ -112,7 +107,7 @@ func (h *authHandler) Refresh(c *gin.Context) {
         return
     }
 
-    c.JSON(http.StatusOK, tokenResponse{
+    c.JSON(http.StatusOK, TokenResponse{
         Access:  res.Access,
         Refresh: res.Refresh,
     })
