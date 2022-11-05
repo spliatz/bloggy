@@ -7,11 +7,15 @@ import (
     "github.com/gin-gonic/gin"
     "github.com/sirupsen/logrus"
 
+    _ "github.com/jackc/pgx/v5/pgtype"
+
     _ "github.com/Intellect-Bloggy/bloggy-backend/docs"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/adapters/db/postgres"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http/middleware"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/service"
     auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth"
+    user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/server"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
     pq_client "github.com/Intellect-Bloggy/bloggy-backend/pkg/client/postgres"
@@ -64,19 +68,26 @@ func main() {
         logrus.Fatal("Не удалось создать менеджер токенов ", err)
     }
 
+    // middlewares
+    authMiddleware := middleware.NewAuthMiddleware(tManager)
+
     // storages
     userStorage := postgres.NewUserStorage(db)
     authStorage := postgres.NewAuthStorage(db)
+    postStorage := postgres.NewPostStorage(db)
 
     // services
     authService := service.NewAuthService(authStorage, tManager)
     userService := service.NewUserService(userStorage, hasher)
+    postService := service.NewPostService(postStorage)
 
     // usecases
     authUsecase := auth_usecase.NewAuthUsecase(authService, userService)
+    userUsecase := user_usecase.NewUserUsecase(userService, postService)
 
     // register handlers
     http.NewAuthHandler(authUsecase).Register(router)
+    http.NewUserHandler(authMiddleware, userUsecase).Register(router)
     http.NewDocsHandler().Register(router)
 
     srv := server.NewServer()

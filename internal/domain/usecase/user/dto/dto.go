@@ -1,4 +1,4 @@
-package user
+package dto
 
 type CreateUserDTO struct {
     Username string `json:"username" binding:"required"`
@@ -13,4 +13,12 @@ type CreateUserDTO struct {
 type GetByCredentialsDTO struct {
     Username string `json:"username" binding:"required"`
     Password string `json:"password" binding:"required"`
+}
+
+type EditUserDTO struct {
+    Username *string `json:"username"`
+    Name     *string `json:"name"`
+    Birthday *string `json:"birthday"`
+    Email    *string `json:"email"`
+    Phone    *string `json:"phone"`
 }

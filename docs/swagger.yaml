@@ -1,32 +1,6 @@
 basePath: /
 definitions:
-  auth.LogoutDTO:
-    properties:
-      token:
-        type: string
-    required:
-    - token
-    type: object
-  auth.RefreshDTO:
-    properties:
-      token:
-        type: string
-    required:
-    - token
-    type: object
-  response.ErrorResponse:
-    properties:
-      error:
-        type: string
-    type: object
-  response.TokenResponse:
-    properties:
-      access_token:
-        type: string
-      refresh_token:
-        type: string
-    type: object
-  user.CreateUserDTO:
+  dto.CreateUserDTO:
     properties:
       birthday:
         description: Use "2000-12-31" format
@@ -45,7 +19,20 @@ definitions:
     - password
     - username
     type: object
-  user.GetByCredentialsDTO:
+  dto.EditUserDTO:
+    properties:
+      birthday:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    type: object
+  dto.GetByCredentialsDTO:
     properties:
       password:
         type: string
@@ -54,6 +41,58 @@ definitions:
     required:
     - password
     - username
+    type: object
+  dto.LogoutDTO:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  dto.RefreshDTO:
+    properties:
+      token:
+        type: string
+    required:
+    - token
+    type: object
+  entity.Post:
+    properties:
+      author_id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+    type: object
+  entity.UserResponseSwagger:
+    properties:
+      birthday:
+        type: string
+      created_at:
+        type: string
+      email:
+        type: string
+      name:
+        type: string
+      phone:
+        type: string
+      username:
+        type: string
+    type: object
+  response.ErrorResponse:
+    properties:
+      error:
+        type: string
+    type: object
+  response.TokenResponse:
+    properties:
+      access_token:
+        type: string
+      refresh_token:
+        type: string
     type: object
 host: localhost:8000
 info:
@@ -74,7 +113,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/auth.LogoutDTO'
+          $ref: '#/definitions/dto.LogoutDTO'
       produces:
       - application/json
       responses:
@@ -117,7 +156,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/auth.RefreshDTO'
+          $ref: '#/definitions/dto.RefreshDTO'
       produces:
       - application/json
       responses:
@@ -160,7 +199,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/user.GetByCredentialsDTO'
+          $ref: '#/definitions/dto.GetByCredentialsDTO'
       produces:
       - application/json
       responses:
@@ -199,7 +238,7 @@ paths:
         name: input
         required: true
         schema:
-          $ref: '#/definitions/user.CreateUserDTO'
+          $ref: '#/definitions/dto.CreateUserDTO'
       produces:
       - application/json
       responses:
@@ -226,6 +265,139 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /user:
+    patch:
+      consumes:
+      - application/json
+      description: login
+      operationId: edit-user-by-username
+      parameters:
+      - description: user information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditUserDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: EditUserByUsername
+      tags:
+      - user
+  /user/{username}:
+    get:
+      consumes:
+      - application/json
+      description: login
+      operationId: get-user-by-username
+      parameters:
+      - description: User username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetUserByUsername
+      tags:
+      - user
+  /user/{username}/posts:
+    get:
+      consumes:
+      - application/json
+      description: Get All User's Posts
+      operationId: get-all-by-username
+      parameters:
+      - description: User username
+        in: path
+        name: username
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.Post'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: GetAllByUsername
+      tags:
+      - user
 securityDefinitions:
   ApiKeyAuth:
     in: header

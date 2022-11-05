@@ -8,8 +8,8 @@ import (
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http/response"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/entity"
-    auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth"
-    user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user"
+    auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth/dto"
+    user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user/dto"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
@@ -44,7 +44,7 @@ func (h *authHandler) Register(router *gin.Engine) {
 // @ID create-account
 // @Accept json
 // @Produce json
-// @Param input body user.CreateUserDTO true "account info"
+// @Param input body dto.CreateUserDTO true "account info"
 // @Success 201 {object} response.TokenResponse
 // @Failure 400,409 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
@@ -72,7 +72,7 @@ func (h *authHandler) signUp(c *gin.Context) {
 // @ID login
 // @Accept json
 // @Produce json
-// @Param input body user.GetByCredentialsDTO true "account username and password"
+// @Param input body dto.GetByCredentialsDTO true "account username and password"
 // @Success 200 {object} response.TokenResponse
 // @Failure 400,403 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
@@ -100,7 +100,7 @@ func (h *authHandler) signIn(c *gin.Context) {
 // @ID get-new-access-and-refresh-token
 // @Accept json
 // @Produce json
-// @Param input body auth.RefreshDTO true "refresh token"
+// @Param input body dto.RefreshDTO true "refresh token"
 // @Success 200 {object} response.TokenResponse
 // @Failure 400,403,404 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
@@ -128,7 +128,7 @@ func (h *authHandler) refresh(c *gin.Context) {
 // @ID logout
 // @Accept json
 // @Produce json
-// @Param input body auth.LogoutDTO true "refresh token"
+// @Param input body dto.LogoutDTO true "refresh token"
 // @Success 200 {object} response.TokenResponse
 // @Failure 400,403,404 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse

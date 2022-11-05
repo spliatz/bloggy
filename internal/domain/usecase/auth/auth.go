@@ -5,7 +5,8 @@ import (
     "time"
 
     "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/entity"
-    user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth/dto"
+    user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user/dto"
 )
 
 type Service interface {
@@ -96,7 +97,7 @@ func (u *authUsecase) SignIn(ctx context.Context, dto user_usecase.GetByCredenti
     return response, err
 }
 
-func (u *authUsecase) Refresh(ctx context.Context, dto RefreshDTO) (entity.Auth, error) {
+func (u *authUsecase) Refresh(ctx context.Context, dto dto.RefreshDTO) (entity.Auth, error) {
     response := entity.Auth{}
     var err error
     if err = u.Service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
@@ -128,7 +129,7 @@ func (u *authUsecase) Refresh(ctx context.Context, dto RefreshDTO) (entity.Auth,
     return response, err
 }
 
-func (u *authUsecase) Logout(ctx context.Context, dto LogoutDTO) error {
+func (u *authUsecase) Logout(ctx context.Context, dto dto.LogoutDTO) error {
     if err := u.Service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
         return err
     }

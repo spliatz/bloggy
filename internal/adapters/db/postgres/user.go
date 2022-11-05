@@ -4,6 +4,7 @@ import (
     "context"
     "errors"
     "fmt"
+    "strings"
 
     "github.com/jackc/pgx/v5"
 
@@ -33,6 +34,25 @@ func (s *userStorage) GetUserByID(ctx context.Context, id int) (entity.User, err
     }
     if err != nil {
         return entity.User{}, err
+    }
+
+    return user, nil
+}
+
+func (s *userStorage) GetByUsername(ctx context.Context, username string) (entity.UserResponse, error) {
+    user := entity.UserResponse{}
+    err := s.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT username, name, birthday, email, phone, created_at
+        FROM %s
+        WHERE username = $1
+    `, usersTable), username).Scan(
+        &user.Username, &user.Name, &user.Birthday,
+        &user.Email, &user.Phone, &user.CreatedAt)
+    if errors.Is(err, pgx.ErrNoRows) {
+        return entity.UserResponse{}, e.ErrIdNotFound
+    }
+    if err != nil {
+        return entity.UserResponse{}, err
     }
 
     return user, nil
@@ -129,6 +149,74 @@ func (s *userStorage) GetByRefreshToken(ctx context.Context, refreshToken string
     }
     if err != nil {
         return entity.User{}, err
+    }
+
+    return user, nil
+}
+
+func (s *userStorage) EditById(ctx context.Context, id int, req map[string]string) (entity.UserResponse, error) {
+    // Проверяем доступность username
+    _id := 0
+    err := s.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE username = $1
+    `, usersTable), req["username"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return entity.UserResponse{}, e.ErrTakenUsername
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return entity.UserResponse{}, err
+    }
+
+    // Проверяем доступность email
+    err = s.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE email = $1
+    `, usersTable), req["email"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return entity.UserResponse{}, e.ErrTakenEmail
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return entity.UserResponse{}, err
+    }
+
+    // Проверяем доступность phone
+    err = s.db.QueryRow(ctx, fmt.Sprintf(`
+        SELECT id
+        FROM %s
+        WHERE phone = $1
+    `, usersTable), req["phone"]).Scan(&_id)
+    if err == nil {
+        // Если он нашел пользователя и успешно просканировал, то он существует
+        return entity.UserResponse{}, e.ErrTakenPhone
+    }
+    if !errors.Is(err, pgx.ErrNoRows) {
+        // Если ошибка не является ошибкой "Не найден пользователь"
+        return entity.UserResponse{}, err
+    }
+
+    // Создаем параметры
+    var updateQuery []string
+    for key, value := range req {
+        updateQuery = append(updateQuery, fmt.Sprintf(`%s = '%s'`, key, value))
+    }
+
+    user := entity.UserResponse{}
+    err = s.db.QueryRow(ctx, fmt.Sprintf(`
+        UPDATE %s 
+        SET %s
+        WHERE id = $1
+        RETURNING username, name, phone, email, birthday
+    `, usersTable, strings.Join(updateQuery, ", ")), id).Scan(
+        &user.Username, &user.Name, &user.Phone, &user.Email, &user.Birthday)
+    if err != nil {
+        return entity.UserResponse{}, err
     }
 
     return user, nil
