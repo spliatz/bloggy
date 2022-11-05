@@ -7,7 +7,7 @@ COPY go.mod .
 COPY go.sum .
 RUN go mod download
 COPY . .
-RUN go build -o bloggy_backend cmd/app.go
+RUN go build -o bloggy_backend cmd/app/main.go
 
 # Deploy
 FROM alpine:latest

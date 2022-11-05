@@ -4,15 +4,18 @@ import (
     "os"
     "strconv"
 
+    "github.com/gin-gonic/gin"
     "github.com/sirupsen/logrus"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
-
-    "github.com/Intellect-Bloggy/bloggy-backend/internal/handler"
-    "github.com/Intellect-Bloggy/bloggy-backend/internal/repository"
+    _ "github.com/Intellect-Bloggy/bloggy-backend/docs"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/adapters/db/postgres"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/service"
+    auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/server"
-    "github.com/Intellect-Bloggy/bloggy-backend/internal/services"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
+    pq_client "github.com/Intellect-Bloggy/bloggy-backend/pkg/client/postgres"
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
 )
 
 // @title Bloggy-backend
@@ -33,7 +36,7 @@ func main() {
         logrus.Fatal("Подключение к базе данных не удалось: некорректный порт")
     }
 
-    db, err := repository.NewPostgresDB(repository.PostgresConfig{
+    db, err := pq_client.NewPostgresDB(pq_client.PostgresConfig{
         Host:     os.Getenv("POSTGRES_HOST"),
         Port:     uint16(dbPort),
         Username: os.Getenv("POSTGRES_USER"),
@@ -52,21 +55,37 @@ func main() {
     salt := "random string test"
     signKey := "random string text"
 
+    router := gin.New()
+
+    // utils
+    hasher := hash.NewSHA1Hasher(salt)
     tManager, err := auth.NewManager(signKey)
     if err != nil {
         logrus.Fatal("Не удалось создать менеджер токенов ", err)
     }
 
-    service := services.NewServices(repository.NewRepository(db), hash.NewSHA1Hasher(salt), tManager)
-    handlers := handler.NewHandlers(service, tManager)
-    srv := server.NewServer()
+    // storages
+    userStorage := postgres.NewUserStorage(db)
+    authStorage := postgres.NewAuthStorage(db)
 
+    // services
+    authService := service.NewAuthService(authStorage, tManager)
+    userService := service.NewUserService(userStorage, hasher)
+
+    // usecases
+    authUsecase := auth_usecase.NewAuthUsecase(authService, userService)
+
+    // register handlers
+    http.NewAuthHandler(authUsecase).Register(router)
+    http.NewDocsHandler().Register(router)
+
+    srv := server.NewServer()
     srvPort, err := strconv.Atoi(os.Getenv("PORT"))
     if srvPort > 1<<16 || srvPort < 1 || err != nil {
         logrus.Fatal("Запуск сервера не удался: некорректный порт")
     }
 
-    if err := srv.Run(uint16(srvPort), handlers.InitRoutes()); err != nil {
+    if err := srv.Run(uint16(srvPort), router); err != nil {
         logrus.Fatal("Ошибка запуска сервера: ", err)
     }
 }

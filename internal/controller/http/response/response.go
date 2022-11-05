@@ -1,11 +1,12 @@
-package handler
+package response
 
 import (
     "fmt"
 
-    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
     "github.com/gin-gonic/gin"
     "github.com/sirupsen/logrus"
+
+    "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
 type ErrorResponse struct {
