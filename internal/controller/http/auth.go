@@ -57,7 +57,7 @@ func (h *authHandler) signUp(c *gin.Context) {
         return
     }
 
-    res, err := h.authUsecase.SignUp(context.Background(), dto)
+    res, err := h.authUsecase.SignUp(c.Request.Context(), dto)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
@@ -85,7 +85,7 @@ func (h *authHandler) signIn(c *gin.Context) {
         return
     }
 
-    res, err := h.authUsecase.SignIn(context.Background(), dto)
+    res, err := h.authUsecase.SignIn(c.Request.Context(), dto)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
@@ -113,7 +113,7 @@ func (h *authHandler) refresh(c *gin.Context) {
         return
     }
 
-    res, err := h.authUsecase.Refresh(context.Background(), dto)
+    res, err := h.authUsecase.Refresh(c.Request.Context(), dto)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
@@ -141,7 +141,7 @@ func (h *authHandler) logout(c *gin.Context) {
         return
     }
 
-    if err := h.authUsecase.Logout(context.Background(), dto); err != nil {
+    if err := h.authUsecase.Logout(c.Request.Context(), dto); err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
     }

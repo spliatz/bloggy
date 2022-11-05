@@ -58,7 +58,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 // @Router /user/{username} [get]
 func (h *userHandler) getByUsername(c *gin.Context) {
     username := c.Param("username")
-    user, err := h.userUsecase.GetByUsername(context.Background(), username)
+    user, err := h.userUsecase.GetByUsername(c.Request.Context(), username)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
@@ -95,7 +95,7 @@ func (h *userHandler) editById(c *gin.Context) {
         return
     }
 
-    user, err := h.userUsecase.EditById(context.Background(), userId, i)
+    user, err := h.userUsecase.EditById(c.Request.Context(), userId, i)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
@@ -118,7 +118,7 @@ func (h *userHandler) editById(c *gin.Context) {
 // @Router /user/{username}/posts [get]
 func (h *userHandler) getAllByUsername(c *gin.Context) {
     username := c.Param("username")
-    posts, err := h.userUsecase.GetAllByUsername(context.Background(), username)
+    posts, err := h.userUsecase.GetAllByUsername(c.Request.Context(), username)
     if err != nil {
         response.ResponseWithError(c, errors.EtoHe(err))
         return
