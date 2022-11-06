@@ -1,5 +1,12 @@
 basePath: /
 definitions:
+  dto.CreatePostDTO:
+    properties:
+      content:
+        type: string
+    required:
+    - content
+    type: object
   dto.CreateUserDTO:
     properties:
       birthday:
@@ -55,6 +62,11 @@ definitions:
         type: string
     required:
     - token
+    type: object
+  entity.CreatePostResponse:
+    properties:
+      id:
+        type: integer
     type: object
   entity.Post:
     properties:
@@ -265,6 +277,158 @@ paths:
       summary: SignUp
       tags:
       - auth
+  /post:
+    post:
+      consumes:
+      - application/json
+      description: create post
+      operationId: create-post
+      parameters:
+      - description: post information
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreatePostDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.CreatePostResponse'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: CreatePost
+      tags:
+      - post
+  /post/{id}:
+    delete:
+      consumes:
+      - application/json
+      description: delete post
+      operationId: delete-post-by-id
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: DeletePostById
+      tags:
+      - post
+    get:
+      consumes:
+      - application/json
+      description: get post
+      operationId: get-post-by-id
+      parameters:
+      - description: post id
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.Post'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "409":
+          description: Conflict
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      summary: GetPostById
+      tags:
+      - post
   /user:
     patch:
       consumes:
@@ -353,8 +517,6 @@ paths:
           description: ""
           schema:
             $ref: '#/definitions/response.ErrorResponse'
-      security:
-      - ApiKeyAuth: []
       summary: GetUserByUsername
       tags:
       - user

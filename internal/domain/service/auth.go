@@ -9,18 +9,18 @@ import (
     auth_helpers "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
 )
 
-type AuthStorage interface {
+type authStorage interface {
     SetSession(ctx context.Context, userId int, session entity.Session) error
     DeleteRefresh(ctx context.Context, refreshToken string) error
     CheckRefresh(ctx context.Context, refreshToken string) error
 }
 
 type authService struct {
-    storage      AuthStorage
+    storage      authStorage
     tokenManager auth_helpers.TokenManager
 }
 
-func NewAuthService(storage AuthStorage, tokenManager auth_helpers.TokenManager) *authService {
+func NewAuthService(storage authStorage, tokenManager auth_helpers.TokenManager) *authService {
     return &authService{storage: storage, tokenManager: tokenManager}
 }
 

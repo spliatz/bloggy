@@ -264,6 +264,238 @@ const docTemplate = `{
                 }
             }
         },
+        "/post": {
+            "post": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "create post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "post"
+                ],
+                "summary": "CreatePost",
+                "operationId": "create-post",
+                "parameters": [
+                    {
+                        "description": "post information",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/dto.CreatePostDTO"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.CreatePostResponse"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
+        "/post/{id}": {
+            "get": {
+                "description": "get post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "post"
+                ],
+                "summary": "GetPostById",
+                "operationId": "get-post-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/entity.Post"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "delete post",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "post"
+                ],
+                "summary": "DeletePostById",
+                "operationId": "delete-post-by-id",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "post id",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "409": {
+                        "description": "Conflict",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    },
+                    "default": {
+                        "description": "",
+                        "schema": {
+                            "$ref": "#/definitions/response.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/user": {
             "patch": {
                 "security": [
@@ -348,11 +580,6 @@ const docTemplate = `{
         },
         "/user/{username}": {
             "get": {
-                "security": [
-                    {
-                        "ApiKeyAuth": []
-                    }
-                ],
                 "description": "login",
                 "consumes": [
                     "application/json"
@@ -470,6 +697,17 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "dto.CreatePostDTO": {
+            "type": "object",
+            "required": [
+                "content"
+            ],
+            "properties": {
+                "content": {
+                    "type": "string"
+                }
+            }
+        },
         "dto.CreateUserDTO": {
             "type": "object",
             "required": [
@@ -552,6 +790,14 @@ const docTemplate = `{
             "properties": {
                 "token": {
                     "type": "string"
+                }
+            }
+        },
+        "entity.CreatePostResponse": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "integer"
                 }
             }
         },

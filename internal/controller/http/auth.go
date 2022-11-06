@@ -13,7 +13,7 @@ import (
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
-type AuthUsecace interface {
+type authUsecase interface {
     SignUp(ctx context.Context, dto user_usecase.CreateUserDTO) (entity.Auth, error)
     SignIn(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.Auth, error)
     Refresh(ctx context.Context, dto auth_usecase.RefreshDTO) (entity.Auth, error)
@@ -21,10 +21,10 @@ type AuthUsecace interface {
 }
 
 type authHandler struct {
-    authUsecase AuthUsecace
+    authUsecase
 }
 
-func NewAuthHandler(authUsecase AuthUsecace) *authHandler {
+func NewAuthHandler(authUsecase authUsecase) *authHandler {
     return &authHandler{authUsecase: authUsecase}
 }
 

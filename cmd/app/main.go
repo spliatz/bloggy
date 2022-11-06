@@ -15,6 +15,7 @@ import (
     "github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http/middleware"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/service"
     auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth"
+    "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/post"
     user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user"
     "github.com/Intellect-Bloggy/bloggy-backend/internal/server"
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
@@ -84,10 +85,12 @@ func main() {
     // usecases
     authUsecase := auth_usecase.NewAuthUsecase(authService, userService)
     userUsecase := user_usecase.NewUserUsecase(userService, postService)
+    postUsecase := post.NewPostUsecase(postService)
 
     // register handlers
     http.NewAuthHandler(authUsecase).Register(router)
     http.NewUserHandler(authMiddleware, userUsecase).Register(router)
+    http.NewPostHandler(authMiddleware, postUsecase).Register(router)
     http.NewDocsHandler().Register(router)
 
     srv := server.NewServer()

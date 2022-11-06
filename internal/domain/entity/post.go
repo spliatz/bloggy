@@ -10,3 +10,7 @@ type Post struct {
     Content   string    `json:"content" db:"content"`
     CreatedAt time.Time `json:"created_at" db:"created_at"`
 }
+
+type CreatePostResponse struct {
+    Id int `json:"id"`
+}

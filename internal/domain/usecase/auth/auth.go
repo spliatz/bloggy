@@ -9,7 +9,7 @@ import (
     user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user/dto"
 )
 
-type Service interface {
+type service interface {
     GenerateAccessToken(ctx context.Context, userId int) (string, error)
     GenerateRefreshToken(ctx context.Context) (string, error)
     SetSession(ctx context.Context, userId int, session entity.Session) error
@@ -17,7 +17,7 @@ type Service interface {
     DeleteRefresh(ctx context.Context, refreshToken string) error
 }
 
-type UserService interface {
+type userService interface {
     CreateUser(ctx context.Context, dto user_usecase.CreateUserDTO) (int, error)
     GetUserByID(ctx context.Context, id int) (entity.User, error)
     GetByCredentials(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.User, error)
@@ -25,14 +25,14 @@ type UserService interface {
 }
 
 type authUsecase struct {
-    Service
-    UserService
+    service
+    userService
 }
 
-func NewAuthUsecase(s Service, us UserService) *authUsecase {
+func NewAuthUsecase(s service, us userService) *authUsecase {
     return &authUsecase{
-        Service:     s,
-        UserService: us,
+        service:     s,
+        userService: us,
     }
 }
 
@@ -40,7 +40,7 @@ func (u *authUsecase) SignUp(ctx context.Context, dto user_usecase.CreateUserDTO
 
     response := entity.Auth{}
 
-    newUserID, err := u.UserService.CreateUser(ctx, dto)
+    newUserID, err := u.userService.CreateUser(ctx, dto)
     if err != nil {
         return response, err
     }
@@ -72,7 +72,7 @@ func (u *authUsecase) SignUp(ctx context.Context, dto user_usecase.CreateUserDTO
 
 func (u *authUsecase) SignIn(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.Auth, error) {
     response := entity.Auth{}
-    user, err := u.UserService.GetByCredentials(ctx, dto)
+    user, err := u.userService.GetByCredentials(ctx, dto)
     if err != nil {
         return response, err
     }
@@ -100,14 +100,14 @@ func (u *authUsecase) SignIn(ctx context.Context, dto user_usecase.GetByCredenti
 func (u *authUsecase) Refresh(ctx context.Context, dto dto.RefreshDTO) (entity.Auth, error) {
     response := entity.Auth{}
     var err error
-    if err = u.Service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
-        if err = u.Service.DeleteRefresh(ctx, dto.RefreshToken); err != nil {
+    if err = u.service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
+        if err = u.service.DeleteRefresh(ctx, dto.RefreshToken); err != nil {
             return response, err
         }
     }
 
     var user entity.User
-    user, err = u.UserService.GetByRefreshToken(ctx, dto.RefreshToken)
+    user, err = u.userService.GetByRefreshToken(ctx, dto.RefreshToken)
 
     response.Access, err = u.GenerateAccessToken(ctx, user.Id)
     if err != nil {
@@ -130,9 +130,9 @@ func (u *authUsecase) Refresh(ctx context.Context, dto dto.RefreshDTO) (entity.A
 }
 
 func (u *authUsecase) Logout(ctx context.Context, dto dto.LogoutDTO) error {
-    if err := u.Service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
+    if err := u.service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
         return err
     }
 
-    return u.Service.DeleteRefresh(ctx, dto.RefreshToken)
+    return u.service.DeleteRefresh(ctx, dto.RefreshToken)
 }

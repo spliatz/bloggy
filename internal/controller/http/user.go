@@ -12,22 +12,22 @@ import (
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
 )
 
-type AuthMiddleware interface {
+type authMiddleware interface {
     UserIdentity(c *gin.Context)
 }
 
-type UserUsecase interface {
+type userUsecase interface {
     GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
     EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
     GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
 }
 
 type userHandler struct {
-    authMiddleware AuthMiddleware
-    userUsecase    UserUsecase
+    authMiddleware
+    userUsecase
 }
 
-func NewUserHandler(authMiddleware AuthMiddleware, userUsecase UserUsecase) *userHandler {
+func NewUserHandler(authMiddleware authMiddleware, userUsecase userUsecase) *userHandler {
     return &userHandler{authMiddleware: authMiddleware, userUsecase: userUsecase}
 }
 
@@ -47,7 +47,6 @@ func (h *userHandler) Register(router *gin.Engine) {
 // @Tags user
 // @Description login
 // @ID get-user-by-username
-// @Security ApiKeyAuth
 // @Accept json
 // @Produce json
 // @Param username path string true "User username"

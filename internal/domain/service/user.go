@@ -13,7 +13,7 @@ import (
     "github.com/Intellect-Bloggy/bloggy-backend/pkg/utils"
 )
 
-type UserStorage interface {
+type userStorage interface {
     GetUserByID(ctx context.Context, id int) (entity.User, error)
     GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
     CreateUser(ctx context.Context, user entity.User) (int, error)
@@ -23,11 +23,11 @@ type UserStorage interface {
 }
 
 type userService struct {
-    storage UserStorage
+    storage userStorage
     hasher  hash.PasswordHasher
 }
 
-func NewUserService(storage UserStorage, hasher hash.PasswordHasher) *userService {
+func NewUserService(storage userStorage, hasher hash.PasswordHasher) *userService {
     return &userService{storage: storage, hasher: hasher}
 }
 
