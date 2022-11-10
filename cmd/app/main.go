@@ -33,7 +33,6 @@ import (
 // @securityDefinitions.apiKey ApiKeyAuth
 // @in header
 // @name Authorization
-
 func main() {
 
     dbPort, err := strconv.Atoi(os.Getenv("POSTGRES_LOCAL_PORT"))
