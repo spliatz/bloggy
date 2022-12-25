@@ -5,8 +5,13 @@ WORKDIR /go/src/bloggy-backend/
 
 COPY go.mod .
 COPY go.sum .
-RUN go mod download
+
+RUN apk add make
+COPY Makefile .
+
+RUN make deps
 COPY . .
+RUN make docs
 RUN go build -o bloggy_backend cmd/app/main.go
 
 # Deploy
