@@ -486,7 +486,7 @@ paths:
     get:
       consumes:
       - application/json
-      description: login
+      description: get user by username
       operationId: get-user-by-username
       parameters:
       - description: User username
@@ -558,6 +558,40 @@ paths:
           schema:
             $ref: '#/definitions/response.ErrorResponse'
       summary: GetAllByUsername
+      tags:
+      - user
+  /user/my:
+    get:
+      consumes:
+      - application/json
+      description: get my user info
+      operationId: get-my
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: GetUserByUsername
       tags:
       - user
 securityDefinitions:
