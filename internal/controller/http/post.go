@@ -54,7 +54,7 @@ func (h *postHandler) Register(router *gin.Engine) {
 // @Failure default {object} response.ErrorResponse
 // @Router /post [post]
 func (h *postHandler) create(c *gin.Context) {
-	userIdI, exist := c.Get("user_id")
+	userIdI, exist := c.Get(fieldUserId)
 	if !exist {
 		response.ResponseWithError(c, errors.ErrIdNotFound)
 		return
@@ -91,7 +91,7 @@ func (h *postHandler) create(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /post/{id} [get]
 func (h *postHandler) getById(c *gin.Context) {
-	postIdS := c.Param("id")
+	postIdS := c.Param(paramId)
 	postId, err := strconv.Atoi(postIdS)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
@@ -121,8 +121,8 @@ func (h *postHandler) getById(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /post/{id} [delete]
 func (h *postHandler) deleteById(c *gin.Context) {
-	postIdS := c.Param("id")
-	userIdI, exist := c.Get("user_id")
+	postIdS := c.Param(paramId)
+	userIdI, exist := c.Get(fieldUserId)
 	if !exist {
 		response.ResponseWithError(c, errors.ErrIdNotFound)
 		return

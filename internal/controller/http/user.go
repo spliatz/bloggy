@@ -58,7 +58,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 // @Failure default {object} response.ErrorResponse
 // @Router /user/my [get]
 func (h *userHandler) getMy(c *gin.Context) {
-	userIdI, exist := c.Get("user_id")
+	userIdI, exist := c.Get(fieldUserId)
 	if !exist {
 		response.ResponseWithError(c, errors.ErrIdNotFound)
 		return
@@ -87,7 +87,7 @@ func (h *userHandler) getMy(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /user/{username} [get]
 func (h *userHandler) getByUsername(c *gin.Context) {
-	username := c.Param("username")
+	username := c.Param(paramUsername)
 	user, err := h.userUsecase.GetByUsername(c.Request.Context(), username)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
@@ -111,7 +111,7 @@ func (h *userHandler) getByUsername(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /user [patch]
 func (h *userHandler) editById(c *gin.Context) {
-	userIdI, exist := c.Get("user_id")
+	userIdI, exist := c.Get(fieldUserId)
 	if !exist {
 		response.ResponseWithError(c, errors.ErrIdNotFound)
 		return
@@ -147,7 +147,7 @@ func (h *userHandler) editById(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /user/{username}/posts [get]
 func (h *userHandler) getAllByUsername(c *gin.Context) {
-	username := c.Param("username")
+	username := c.Param(paramUsername)
 	posts, err := h.userUsecase.GetAllByUsername(c.Request.Context(), username)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
