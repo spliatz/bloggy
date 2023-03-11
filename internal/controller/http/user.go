@@ -6,10 +6,10 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http/response"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/domain/entity"
-	user_dto "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user/dto"
-	"github.com/Intellect-Bloggy/bloggy-backend/pkg/errors"
+	"github.com/spliatz/bloggy-backend/internal/controller/http/response"
+	"github.com/spliatz/bloggy-backend/internal/domain/entity"
+	user_dto "github.com/spliatz/bloggy-backend/internal/domain/usecase/user/dto"
+	"github.com/spliatz/bloggy-backend/pkg/errors"
 )
 
 type authMiddleware interface {

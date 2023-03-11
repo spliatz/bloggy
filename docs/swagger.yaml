@@ -131,8 +131,6 @@ paths:
       responses:
         "200":
           description: OK
-          schema:
-            $ref: '#/definitions/response.TokenResponse'
         "400":
           description: Bad Request
           schema:

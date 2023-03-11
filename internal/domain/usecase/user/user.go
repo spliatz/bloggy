@@ -2,8 +2,8 @@ package user
 
 import (
 	"context"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/domain/entity"
-	user_dto "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user/dto"
+	"github.com/spliatz/bloggy-backend/internal/domain/entity"
+	user_dto "github.com/spliatz/bloggy-backend/internal/domain/usecase/user/dto"
 )
 
 type service interface {

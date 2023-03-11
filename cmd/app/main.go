@@ -10,18 +10,18 @@ import (
 
 	_ "github.com/jackc/pgx/v5/pgtype"
 
-	_ "github.com/Intellect-Bloggy/bloggy-backend/docs"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/adapters/db/postgres"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/controller/http/middleware"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/domain/service"
-	auth_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/auth"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/post"
-	user_usecase "github.com/Intellect-Bloggy/bloggy-backend/internal/domain/usecase/user"
-	"github.com/Intellect-Bloggy/bloggy-backend/internal/server"
-	"github.com/Intellect-Bloggy/bloggy-backend/pkg/auth"
-	pq_client "github.com/Intellect-Bloggy/bloggy-backend/pkg/client/postgres"
-	"github.com/Intellect-Bloggy/bloggy-backend/pkg/hash"
+	_ "github.com/spliatz/bloggy-backend/docs"
+	"github.com/spliatz/bloggy-backend/internal/adapters/db/postgres"
+	"github.com/spliatz/bloggy-backend/internal/controller/http"
+	"github.com/spliatz/bloggy-backend/internal/controller/http/middleware"
+	"github.com/spliatz/bloggy-backend/internal/domain/service"
+	auth_usecase "github.com/spliatz/bloggy-backend/internal/domain/usecase/auth"
+	"github.com/spliatz/bloggy-backend/internal/domain/usecase/post"
+	user_usecase "github.com/spliatz/bloggy-backend/internal/domain/usecase/user"
+	"github.com/spliatz/bloggy-backend/internal/server"
+	"github.com/spliatz/bloggy-backend/pkg/auth"
+	pq_client "github.com/spliatz/bloggy-backend/pkg/client/postgres"
+	"github.com/spliatz/bloggy-backend/pkg/hash"
 )
 
 // @title Bloggy-backend

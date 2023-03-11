@@ -1,4 +1,4 @@
-module github.com/Intellect-Bloggy/bloggy-backend
+module github.com/spliatz/bloggy-backend
 
 go 1.19
 
