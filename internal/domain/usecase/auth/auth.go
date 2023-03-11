@@ -14,7 +14,6 @@ type service interface {
 	GenerateRefreshToken(ctx context.Context) (string, error)
 	SetSession(ctx context.Context, userId int, session entity.Session) error
 	CheckRefresh(ctx context.Context, refreshToken string) error
-	// UpdateSession(ctx context.Context, userId int, newRefreshToken string) error
 	DeleteUserSession(ctx context.Context, userId int) error
 }
 
@@ -102,13 +101,14 @@ func (u *authUsecase) Refresh(ctx context.Context, dto dto.RefreshDTO) (entity.A
 	response := entity.Auth{}
 	var err error
 	if err = u.service.CheckRefresh(ctx, dto.RefreshToken); err != nil {
-		//if err = u.service.DeleteRefresh(ctx, dto.RefreshToken); err != nil {
-		//	return response, err
-		//}
+		return response, err
 	}
 
-	var user entity.User
-	user, err = u.userService.GetByRefreshToken(ctx, dto.RefreshToken)
+	user, err := u.userService.GetByRefreshToken(ctx, dto.RefreshToken)
+
+	if err = u.DeleteUserSession(ctx, user.Id); err != nil {
+		return response, err
+	}
 
 	response.Access, err = u.GenerateAccessToken(ctx, user.Id)
 	if err != nil {
