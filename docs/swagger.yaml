@@ -26,6 +26,13 @@ definitions:
     - password
     - username
     type: object
+  dto.EditNameDTO:
+    properties:
+      name:
+        type: string
+    required:
+    - name
+    type: object
   dto.EditUserDTO:
     properties:
       birthday:
@@ -590,6 +597,49 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: GetUserByUsername
+      tags:
+      - user
+  /user/name:
+    patch:
+      consumes:
+      - application/json
+      description: Edit user's name
+      operationId: edit-user-name
+      parameters:
+      - description: user name
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditNameDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/entity.UserResponseSwagger'
+            type: array
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: EditName
       tags:
       - user
 securityDefinitions:

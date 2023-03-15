@@ -221,3 +221,19 @@ func (s *userStorage) EditById(ctx context.Context, id int, req map[string]strin
 
 	return user, nil
 }
+
+func (s *userStorage) EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error) {
+	user := entity.UserResponse{}
+	err := s.db.QueryRow(ctx, fmt.Sprintf(`
+		UPDATE %s
+		SET name=$1
+		WHERE id=$2
+		RETURNING username, name, phone, email, birthday
+	`, usersTable), name, id).Scan(&user.Username, &user.Name, &user.Phone, &user.Email, &user.Birthday)
+
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	return user, nil
+}

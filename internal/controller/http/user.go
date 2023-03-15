@@ -20,6 +20,7 @@ type userUsecase interface {
 	GetById(ctx context.Context, id int) (entity.UserResponse, error)
 	GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
 	EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
+	EditNameById(ctx context.Context, id int, dto user_dto.EditNameDTO) (entity.UserResponse, error)
 	GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
 }
 
@@ -39,6 +40,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 		{
 			protected.GET("/my", h.getMy)
 			protected.PATCH("", h.editById)
+			protected.PATCH("/name", h.editNameById)
 		}
 		user.GET("/:username", h.getByUsername)
 		user.GET("/:username/posts", h.getAllByUsername)
@@ -126,6 +128,43 @@ func (h *userHandler) editById(c *gin.Context) {
 	}
 
 	user, err := h.userUsecase.EditById(c.Request.Context(), userId, i)
+	if err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary EditName
+// @Tags user
+// @Description Edit user's name
+// @Security ApiKeyAuth
+// @ID edit-user-name
+// @Accept json
+// @Produce json
+// @Param input body dto.EditNameDTO true "user name"
+// @Success 200 {array} entity.UserResponseSwagger
+// @Failure 400,404 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Failure default {object} response.ErrorResponse
+// @Router /user/name [patch]
+func (h *userHandler) editNameById(c *gin.Context) {
+	userIdI, exist := c.Get(fieldUserId)
+	if !exist {
+		response.ResponseWithError(c, errors.ErrIdNotFound)
+		return
+	}
+
+	userId, _ := userIdI.(int)
+
+	dto := user_dto.EditNameDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
+		return
+	}
+
+	user, err := h.EditNameById(c.Request.Context(), userId, dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
