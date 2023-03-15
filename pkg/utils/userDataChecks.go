@@ -1,7 +1,6 @@
 package utils
 
 import (
-	"strconv"
 	"strings"
 	"time"
 	"unicode"
@@ -70,32 +69,11 @@ func CheckName(s string) error {
 }
 
 func ParseDate(s string) (time.Time, error) {
-	dateParts := strings.Split(s, "-")
-	if len(dateParts) != 3 || len(dateParts[0]) != 4 || len(dateParts[1]) != 2 || len(dateParts[2]) != 2 {
-		return time.Time{}, errors.ErrWrongDateFormat
-	}
-
-	year, err := strconv.Atoi(dateParts[0])
+	const dateFormat = "2006-01-02"
+	date, err := time.Parse(dateFormat, s)
 	if err != nil {
 		return time.Time{}, errors.ErrWrongDateFormat
 	}
-
-	month, err := strconv.Atoi(dateParts[1])
-	if err != nil {
-		return time.Time{}, errors.ErrWrongDateFormat
-	}
-
-	day, err := strconv.Atoi(dateParts[2])
-	if err != nil {
-		return time.Time{}, errors.ErrWrongDateFormat
-	}
-
-	date := time.Date(
-		year,
-		time.Month(month),
-		day,
-		0, 0, 0, 0, nil)
-
 	return date, nil
 }
 

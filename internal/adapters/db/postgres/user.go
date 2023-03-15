@@ -4,6 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/spliatz/bloggy-backend/pkg/utils"
 	"strings"
 
 	"github.com/jackc/pgx/v5"
@@ -231,6 +233,30 @@ func (s *userStorage) EditNameById(ctx context.Context, id int, name string) (en
 		RETURNING username, name, phone, email, birthday
 	`, usersTable), name, id).Scan(&user.Username, &user.Name, &user.Phone, &user.Email, &user.Birthday)
 
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	return user, nil
+}
+
+func (s *userStorage) EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error) {
+	user := entity.UserResponse{}
+	var birthdayPG pgtype.Date
+	if birthday != "" {
+		date, err := utils.ParseDate(birthday)
+		if err != nil {
+			return entity.UserResponse{}, err
+		}
+		birthdayPG = pgtype.Date{Time: date, Valid: true}
+	}
+
+	err := s.db.QueryRow(ctx, fmt.Sprintf(`
+	UPDATE %s
+	SET birthday=$1
+	WHERE id=$2
+	RETURNING username, name, phone, email, birthday
+	`, usersTable), birthdayPG, id).Scan(&user.Username, &user.Name, &user.Phone, &user.Email, &user.Birthday)
 	if err != nil {
 		return entity.UserResponse{}, err
 	}

@@ -21,6 +21,7 @@ type userUsecase interface {
 	GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
 	EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, dto user_dto.EditNameDTO) (entity.UserResponse, error)
+	EditBirthdayById(ctx context.Context, id int, dto user_dto.EditBirthdayDTO) (entity.UserResponse, error)
 	GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
 }
 
@@ -41,6 +42,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 			protected.GET("/my", h.getMy)
 			protected.PATCH("", h.editById)
 			protected.PATCH("/name", h.editNameById)
+			protected.PATCH("/birthday", h.editBirthdayById)
 		}
 		user.GET("/:username", h.getByUsername)
 		user.GET("/:username/posts", h.getAllByUsername)
@@ -144,7 +146,7 @@ func (h *userHandler) editById(c *gin.Context) {
 // @Accept json
 // @Produce json
 // @Param input body dto.EditNameDTO true "user name"
-// @Success 200 {array} entity.UserResponseSwagger
+// @Success 200 {object} entity.UserResponseSwagger
 // @Failure 400,404 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Failure default {object} response.ErrorResponse
@@ -165,6 +167,43 @@ func (h *userHandler) editNameById(c *gin.Context) {
 	}
 
 	user, err := h.EditNameById(c.Request.Context(), userId, dto)
+	if err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary EditBirthday
+// @Tags user
+// @Description Edit user's birthday
+// @Security ApiKeyAuth
+// @ID edit-user-birthday
+// @Accept json
+// @Produce json
+// @Param input body dto.EditBirthdayDTO true "user birthday"
+// @Success 200 {object} entity.UserResponseSwagger
+// @Failure 400,404 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Failure default {object} response.ErrorResponse
+// @Router /user/birthday [patch]
+func (h *userHandler) editBirthdayById(c *gin.Context) {
+	userIdI, exist := c.Get(fieldUserId)
+	if !exist {
+		response.ResponseWithError(c, errors.ErrIdNotFound)
+		return
+	}
+
+	userId, _ := userIdI.(int)
+
+	dto := user_dto.EditBirthdayDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
+		return
+	}
+
+	user, err := h.userUsecase.EditBirthdayById(c.Request.Context(), userId, dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return

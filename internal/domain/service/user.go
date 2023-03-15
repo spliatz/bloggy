@@ -21,6 +21,7 @@ type userStorage interface {
 	GetByRefreshToken(ctx context.Context, refreshToken string) (entity.User, error)
 	EditById(ctx context.Context, id int, req map[string]string) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error)
+	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
 }
 
 type userService struct {
@@ -147,4 +148,8 @@ func (s *userService) EditById(ctx context.Context, id int, i user_dto.EditUserD
 
 func (s *userService) EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error) {
 	return s.storage.EditNameById(ctx, id, name)
+}
+
+func (s *userService) EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error) {
+	return s.storage.EditBirthdayById(ctx, id, birthday)
 }

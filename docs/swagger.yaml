@@ -26,6 +26,13 @@ definitions:
     - password
     - username
     type: object
+  dto.EditBirthdayDTO:
+    properties:
+      birthday:
+        type: string
+    required:
+    - birthday
+    type: object
   dto.EditNameDTO:
     properties:
       name:
@@ -565,6 +572,47 @@ paths:
       summary: GetAllByUsername
       tags:
       - user
+  /user/birthday:
+    patch:
+      consumes:
+      - application/json
+      description: Edit user's birthday
+      operationId: edit-user-birthday
+      parameters:
+      - description: user birthday
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditBirthdayDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: EditBirthday
+      tags:
+      - user
   /user/my:
     get:
       consumes:
@@ -618,9 +666,7 @@ paths:
         "200":
           description: OK
           schema:
-            items:
-              $ref: '#/definitions/entity.UserResponseSwagger'
-            type: array
+            $ref: '#/definitions/entity.UserResponseSwagger'
         "400":
           description: Bad Request
           schema:
