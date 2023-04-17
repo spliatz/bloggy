@@ -15,6 +15,8 @@ type service interface {
 	SetSession(ctx context.Context, userId int, session entity.Session) error
 	CheckRefresh(ctx context.Context, refreshToken string) error
 	DeleteUserSession(ctx context.Context, userId int) error
+	CheckPassword(ctx context.Context, userId int, password string) error
+	UpdatePassword(ctx context.Context, userId int, newPassword string) error
 }
 
 type userService interface {
@@ -140,4 +142,17 @@ func (u *authUsecase) Logout(ctx context.Context, dto dto.LogoutDTO) error {
 	}
 
 	return u.service.DeleteUserSession(ctx, user.Id)
+}
+
+func (u *authUsecase) UpdatePassword(ctx context.Context, dto dto.UpdatePasswordDTO) error {
+
+	if err := u.service.CheckPassword(ctx, dto.UserId, dto.Old); err != nil {
+		return err
+	}
+
+	if err := u.service.UpdatePassword(ctx, dto.UserId, dto.New); err != nil {
+		return err
+	}
+
+	return nil
 }

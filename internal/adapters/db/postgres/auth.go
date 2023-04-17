@@ -72,3 +72,32 @@ func (s *authStorage) CheckRefresh(ctx context.Context, refreshToken string) err
 
 	return nil
 }
+
+func (s *authStorage) GetPassword(ctx context.Context, userId int) (string, error) {
+	var password string
+
+	query := fmt.Sprintf(`SELECT password FROM %s WHERE user_id=$1`, authTable)
+	if err := s.db.QueryRow(ctx, query, userId).Scan(&password); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", e.ErrWrongCredentialsPassword
+		}
+
+		return "", err
+	}
+
+	return password, nil
+}
+
+func (s *authStorage) UpdatePassword(ctx context.Context, userId int, newPassword string) error {
+	var password string
+	query := fmt.Sprintf(`UPDATE %s SET password=$1 WHERE user_id=$2 RETURNING password`, authTable)
+	if err := s.db.QueryRow(ctx, query, newPassword, userId).Scan(&password); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return e.ErrUserNotFound
+		}
+
+		return err
+	}
+
+	return nil
+}

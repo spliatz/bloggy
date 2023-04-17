@@ -8,24 +8,26 @@ import (
 
 	"github.com/spliatz/bloggy-backend/internal/controller/http/response"
 	"github.com/spliatz/bloggy-backend/internal/domain/entity"
-	auth_usecase "github.com/spliatz/bloggy-backend/internal/domain/usecase/auth/dto"
-	user_usecase "github.com/spliatz/bloggy-backend/internal/domain/usecase/user/dto"
+	auth_dto "github.com/spliatz/bloggy-backend/internal/domain/usecase/auth/dto"
+	user_dto "github.com/spliatz/bloggy-backend/internal/domain/usecase/user/dto"
 	"github.com/spliatz/bloggy-backend/pkg/errors"
 )
 
 type authUsecase interface {
-	SignUp(ctx context.Context, dto user_usecase.CreateUserDTO) (entity.Auth, error)
-	SignIn(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.Auth, error)
-	Refresh(ctx context.Context, dto auth_usecase.RefreshDTO) (entity.Auth, error)
-	Logout(ctx context.Context, dto auth_usecase.LogoutDTO) error
+	SignUp(ctx context.Context, dto user_dto.CreateUserDTO) (entity.Auth, error)
+	SignIn(ctx context.Context, dto user_dto.GetByCredentialsDTO) (entity.Auth, error)
+	Refresh(ctx context.Context, dto auth_dto.RefreshDTO) (entity.Auth, error)
+	Logout(ctx context.Context, dto auth_dto.LogoutDTO) error
+	UpdatePassword(ctx context.Context, dto auth_dto.UpdatePasswordDTO) error
 }
 
 type authHandler struct {
 	authUsecase
+	authMiddleware
 }
 
-func NewAuthHandler(authUsecase authUsecase) *authHandler {
-	return &authHandler{authUsecase: authUsecase}
+func NewAuthHandler(authUsecase authUsecase, authMiddleware authMiddleware) *authHandler {
+	return &authHandler{authUsecase: authUsecase, authMiddleware: authMiddleware}
 }
 
 func (h *authHandler) Register(router *gin.Engine) {
@@ -35,6 +37,10 @@ func (h *authHandler) Register(router *gin.Engine) {
 		auth.POST("/signin", h.signIn)
 		auth.POST("/refresh", h.refresh)
 		auth.DELETE("/logout", h.logout)
+		protected := auth.Group("/account", h.authMiddleware.UserIdentity)
+		{
+			protected.PUT("/password", h.updatePassword)
+		}
 	}
 }
 
@@ -51,7 +57,7 @@ func (h *authHandler) Register(router *gin.Engine) {
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/signup [post]
 func (h *authHandler) signUp(c *gin.Context) {
-	dto := user_usecase.CreateUserDTO{}
+	dto := user_dto.CreateUserDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -79,7 +85,7 @@ func (h *authHandler) signUp(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/signin [post]
 func (h *authHandler) signIn(c *gin.Context) {
-	dto := user_usecase.GetByCredentialsDTO{}
+	dto := user_dto.GetByCredentialsDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -107,7 +113,7 @@ func (h *authHandler) signIn(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/refresh [post]
 func (h *authHandler) refresh(c *gin.Context) {
-	dto := auth_usecase.RefreshDTO{}
+	dto := auth_dto.RefreshDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -135,7 +141,7 @@ func (h *authHandler) refresh(c *gin.Context) {
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/logout [delete]
 func (h *authHandler) logout(c *gin.Context) {
-	dto := auth_usecase.LogoutDTO{}
+	dto := auth_dto.LogoutDTO{}
 	if err := c.BindJSON(&dto); err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -146,5 +152,43 @@ func (h *authHandler) logout(c *gin.Context) {
 		return
 	}
 
-	c.Status(200)
+	c.Status(http.StatusOK)
+}
+
+// @Summary UpdatePassword
+// @Tags auth
+// @Security ApiKeyAuth
+// @Description update account password
+// @ID update-password
+// @Accept json
+// @Produce json
+// @Param input body dto.UpdatePasswordDTO true "old and new passwords"
+// @Success 204
+// @Failure 400,403,404 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Failure default {object} response.ErrorResponse
+// @Router /auth/account/password [put]
+func (h *authHandler) updatePassword(c *gin.Context) {
+	userIdI, exist := c.Get(fieldUserId)
+	if !exist {
+		response.ResponseWithError(c, errors.ErrIdNotFound)
+		return
+	}
+
+	userId, _ := userIdI.(int)
+
+	dto := auth_dto.UpdatePasswordDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	dto.UserId = userId
+
+	if err := h.UpdatePassword(c.Request.Context(), dto); err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	c.Status(http.StatusNoContent)
 }

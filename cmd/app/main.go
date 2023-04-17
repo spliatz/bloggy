@@ -81,7 +81,7 @@ func main() {
 	postStorage := postgres.NewPostStorage(db)
 
 	// services
-	authService := service.NewAuthService(authStorage, tManager)
+	authService := service.NewAuthService(authStorage, tManager, hasher)
 	userService := service.NewUserService(userStorage, hasher)
 	postService := service.NewPostService(postStorage)
 
@@ -91,7 +91,7 @@ func main() {
 	postUsecase := post.NewPostUsecase(postService)
 
 	// register handlers
-	http.NewAuthHandler(authUsecase).Register(router)
+	http.NewAuthHandler(authUsecase, authMiddleware).Register(router)
 	http.NewUserHandler(authMiddleware, userUsecase).Register(router)
 	http.NewPostHandler(authMiddleware, postUsecase).Register(router)
 	http.NewDocsHandler().Register(router)

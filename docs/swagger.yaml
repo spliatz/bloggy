@@ -77,6 +77,18 @@ definitions:
     required:
     - token
     type: object
+  dto.UpdatePasswordDTO:
+    properties:
+      new:
+        type: string
+      old:
+        type: string
+      user_id:
+        type: integer
+    required:
+    - new
+    - old
+    type: object
   entity.CreatePostResponse:
     properties:
       id:
@@ -127,6 +139,49 @@ info:
   title: Bloggy-backend
   version: "1.0"
 paths:
+  /auth/account/password:
+    put:
+      consumes:
+      - application/json
+      description: update account password
+      operationId: update-password
+      parameters:
+      - description: old and new passwords
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdatePasswordDTO'
+      produces:
+      - application/json
+      responses:
+        "204":
+          description: No Content
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "403":
+          description: Forbidden
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: UpdatePassword
+      tags:
+      - auth
   /auth/logout:
     delete:
       consumes:
