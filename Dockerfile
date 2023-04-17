@@ -11,6 +11,8 @@ COPY Makefile .
 
 RUN make deps
 COPY . .
+RUN go install github.com/swaggo/swag/cmd/swag@latest
+RUN rm -rf docs
 RUN make docs
 RUN go build -o bloggy_backend cmd/app/main.go
 

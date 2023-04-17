@@ -218,6 +218,8 @@ func (h *userHandler) editUsernameById(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary EditEMail
+// @Tags user
 // @Description Edit user's email
 // @Security ApiKeyAuth
 // @ID edit-user-email
@@ -253,6 +255,8 @@ func (h *userHandler) editEmailById(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
+// @Summary EditPhone
+// @Tags user
 // @Description Edit user's phone
 // @Security ApiKeyAuth
 // @ID edit-user-phone

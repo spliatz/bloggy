@@ -33,12 +33,26 @@ definitions:
     required:
     - birthday
     type: object
+  dto.EditEmailDTO:
+    properties:
+      email:
+        type: string
+    required:
+    - email
+    type: object
   dto.EditNameDTO:
     properties:
       name:
         type: string
     required:
     - name
+    type: object
+  dto.EditPhoneDTO:
+    properties:
+      phone:
+        type: string
+    required:
+    - phone
     type: object
   dto.EditUserDTO:
     properties:
@@ -52,6 +66,13 @@ definitions:
         type: string
       username:
         type: string
+    type: object
+  dto.EditUsernameDTO:
+    properties:
+      username:
+        type: string
+    required:
+    - username
     type: object
   dto.GetByCredentialsDTO:
     properties:
@@ -668,6 +689,44 @@ paths:
       summary: EditBirthday
       tags:
       - user
+  /user/email:
+    patch:
+      consumes:
+      - application/json
+      description: Edit user's email
+      operationId: edit-user-email
+      parameters:
+      - description: user email
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditEmailDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
   /user/my:
     get:
       consumes:
@@ -741,6 +800,85 @@ paths:
       security:
       - ApiKeyAuth: []
       summary: EditName
+      tags:
+      - user
+  /user/phone:
+    patch:
+      consumes:
+      - application/json
+      description: Edit user's phone
+      operationId: edit-user-phone
+      parameters:
+      - description: user phone
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditPhoneDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+  /user/username:
+    patch:
+      consumes:
+      - application/json
+      description: Edit user's username
+      operationId: edit-user-username
+      parameters:
+      - description: user username
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/dto.EditUsernameDTO'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/entity.UserResponseSwagger'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+        default:
+          description: ""
+          schema:
+            $ref: '#/definitions/response.ErrorResponse'
+      security:
+      - ApiKeyAuth: []
+      summary: EditUsername
       tags:
       - user
 securityDefinitions:
