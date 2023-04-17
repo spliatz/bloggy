@@ -24,6 +24,7 @@ type userStorage interface {
 	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
 	EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error)
 	EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error)
+	EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error)
 }
 
 type userService struct {
@@ -167,4 +168,11 @@ func (s *userService) EditEmailById(ctx context.Context, id int, email string) (
 		return entity.UserResponse{}, err
 	}
 	return s.storage.EditEmailById(ctx, id, email)
+}
+
+func (s *userService) EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error) {
+	if err := utils.CheckPhone(phone); err != nil {
+		return entity.UserResponse{}, err
+	}
+	return s.storage.EditPhoneById(ctx, id, phone)
 }

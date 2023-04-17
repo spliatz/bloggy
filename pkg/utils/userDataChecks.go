@@ -1,15 +1,15 @@
 package utils
 
 import (
+	"github.com/spliatz/bloggy-backend/pkg/errors"
 	"regexp"
 	"strings"
 	"time"
 	"unicode"
-
-	"github.com/spliatz/bloggy-backend/pkg/errors"
 )
 
 const emailCheckRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
+const phoneCheckRegex = `^(?:(?:\(?(?:00|\+)([1-4]\d\d|[1-9]\d?)\)?)?[\-\.\ \\\/]?)?((?:\(?\d{1,}\)?[\-\.\ \\\/]?){0,})(?:[\-\.\ \\\/]?(?:#|ext\.?|extension|x)[\-\.\ \\\/]?(\d+))?$`
 
 func CheckUsername(s string) error {
 	if len(s) < 3 || len(s) > 30 {
@@ -73,8 +73,16 @@ func CheckName(s string) error {
 
 func CheckEmail(email string) error {
 	emailRegex := regexp.MustCompile(emailCheckRegex)
-	if ok := emailRegex.MatchString(email); !ok {
-		return errors.ErrEmail
+	if ok := emailRegex.MatchString(email); !ok || len(email) > 50 {
+		return errors.ErrWrongEmail
+	}
+	return nil
+}
+
+func CheckPhone(phone string) error {
+	emailRegex := regexp.MustCompile(phoneCheckRegex)
+	if ok := emailRegex.MatchString(phone); !ok || len(phone) > 15 {
+		return errors.ErrWrongPhone
 	}
 	return nil
 }

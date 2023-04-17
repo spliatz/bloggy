@@ -24,6 +24,7 @@ type userUsecase interface {
 	EditBirthdayById(ctx context.Context, id int, dto user_dto.EditBirthdayDTO) (entity.UserResponse, error)
 	EditUsernameById(ctx context.Context, id int, dto user_dto.EditUsernameDTO) (entity.UserResponse, error)
 	EditEmailById(ctx context.Context, id int, dto user_dto.EditEmailDTO) (entity.UserResponse, error)
+	EditPhoneById(ctx context.Context, id int, dto user_dto.EditPhoneDTO) (entity.UserResponse, error)
 	GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
 }
 
@@ -47,6 +48,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 			protected.PATCH("/birthday", h.editBirthdayById)
 			protected.PATCH("/username", h.editUsernameById)
 			protected.PATCH("/email", h.editEmailById)
+			protected.PATCH("/phone", h.editPhoneById)
 		}
 		user.GET("/:username", h.getByUsername)
 		user.GET("/:username/posts", h.getAllByUsername)
@@ -243,6 +245,41 @@ func (h *userHandler) editEmailById(c *gin.Context) {
 	}
 
 	user, err := h.EditEmailById(c.Request.Context(), userId, dto)
+	if err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Description Edit user's phone
+// @Security ApiKeyAuth
+// @ID edit-user-phone
+// @Accept json
+// @Produce json
+// @Param input body dto.EditPhoneDTO true "user phone"
+// @Success 200 {object} entity.UserResponseSwagger
+// @Failure 400,404 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Failure default {object} response.ErrorResponse
+// @Router /user/phone [patch]
+func (h *userHandler) editPhoneById(c *gin.Context) {
+	userIdI, exist := c.Get(fieldUserId)
+	if !exist {
+		response.ResponseWithError(c, errors.ErrIdNotFound)
+		return
+	}
+
+	userId, _ := userIdI.(int)
+
+	dto := user_dto.EditPhoneDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
+		return
+	}
+
+	user, err := h.EditPhoneById(c.Request.Context(), userId, dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return

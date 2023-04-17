@@ -14,6 +14,7 @@ type service interface {
 	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
 	EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error)
 	EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error)
+	EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error)
 }
 
 type postService interface {
@@ -67,4 +68,8 @@ func (u *userUsecase) EditUsernameById(ctx context.Context, id int, dto user_dto
 
 func (u *userUsecase) EditEmailById(ctx context.Context, id int, dto user_dto.EditEmailDTO) (entity.UserResponse, error) {
 	return u.service.EditEmailById(ctx, id, dto.Email)
+}
+
+func (u *userUsecase) EditPhoneById(ctx context.Context, id int, dto user_dto.EditPhoneDTO) (entity.UserResponse, error) {
+	return u.service.EditPhoneById(ctx, id, dto.Phone)
 }
