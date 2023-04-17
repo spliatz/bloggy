@@ -23,6 +23,7 @@ type userStorage interface {
 	EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
 	EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error)
+	EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error)
 }
 
 type userService struct {
@@ -131,7 +132,9 @@ func (s *userService) EditById(ctx context.Context, id int, i user_dto.EditUserD
 		reqMap["birthday"] = *i.Birthday
 	}
 	if i.Email != nil && *i.Email != "" {
-		// TODO: Добавить проверку почты на совпадение с форматом xxx@zzz.com
+		if err := utils.CheckEmail(*i.Email); err != nil {
+			return entity.UserResponse{}, err
+		}
 		reqMap["email"] = *i.Email
 	}
 	if i.Phone != nil && *i.Phone != "" {
@@ -157,4 +160,11 @@ func (s *userService) EditBirthdayById(ctx context.Context, id int, birthday str
 
 func (s *userService) EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error) {
 	return s.storage.EditUsernameById(ctx, id, username)
+}
+
+func (s *userService) EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error) {
+	if err := utils.CheckEmail(email); err != nil {
+		return entity.UserResponse{}, err
+	}
+	return s.storage.EditEmailById(ctx, id, email)
 }

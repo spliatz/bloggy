@@ -1,12 +1,15 @@
 package utils
 
 import (
+	"regexp"
 	"strings"
 	"time"
 	"unicode"
 
 	"github.com/spliatz/bloggy-backend/pkg/errors"
 )
+
+const emailCheckRegex = "^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$"
 
 func CheckUsername(s string) error {
 	if len(s) < 3 || len(s) > 30 {
@@ -65,6 +68,14 @@ func CheckName(s string) error {
 		}
 	}
 
+	return nil
+}
+
+func CheckEmail(email string) error {
+	emailRegex := regexp.MustCompile(emailCheckRegex)
+	if ok := emailRegex.MatchString(email); !ok {
+		return errors.ErrEmail
+	}
 	return nil
 }
 
