@@ -22,6 +22,7 @@ type userUsecase interface {
 	EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, dto user_dto.EditNameDTO) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, dto user_dto.EditBirthdayDTO) (entity.UserResponse, error)
+	EditUsernameById(ctx context.Context, id int, dto user_dto.EditUsernameDTO) (entity.UserResponse, error)
 	GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
 }
 
@@ -43,6 +44,7 @@ func (h *userHandler) Register(router *gin.Engine) {
 			protected.PATCH("", h.editById)
 			protected.PATCH("/name", h.editNameById)
 			protected.PATCH("/birthday", h.editBirthdayById)
+			protected.PATCH("/username", h.editUsernameById)
 		}
 		user.GET("/:username", h.getByUsername)
 		user.GET("/:username/posts", h.getAllByUsername)
@@ -167,6 +169,43 @@ func (h *userHandler) editNameById(c *gin.Context) {
 	}
 
 	user, err := h.EditNameById(c.Request.Context(), userId, dto)
+	if err != nil {
+		response.ResponseWithError(c, errors.EtoHe(err))
+		return
+	}
+
+	c.JSON(http.StatusOK, user)
+}
+
+// @Summary EditUsername
+// @Tags user
+// @Description Edit user's username
+// @Security ApiKeyAuth
+// @ID edit-user-username
+// @Accept json
+// @Produce json
+// @Param input body dto.EditUsernameDTO true "user username"
+// @Success 200 {object} entity.UserResponseSwagger
+// @Failure 400,404 {object} response.ErrorResponse
+// @Failure 500 {object} response.ErrorResponse
+// @Failure default {object} response.ErrorResponse
+// @Router /user/username [patch]
+func (h *userHandler) editUsernameById(c *gin.Context) {
+	userIdI, exist := c.Get(fieldUserId)
+	if !exist {
+		response.ResponseWithError(c, errors.ErrIdNotFound)
+		return
+	}
+
+	userId, _ := userIdI.(int)
+
+	dto := user_dto.EditUsernameDTO{}
+	if err := c.BindJSON(&dto); err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
+		return
+	}
+
+	user, err := h.EditUsernameById(c.Request.Context(), userId, dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return

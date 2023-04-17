@@ -30,3 +30,7 @@ type EditNameDTO struct {
 type EditBirthdayDTO struct {
 	Birthday string `json:"birthday" binding:"required"`
 }
+
+type EditUsernameDTO struct {
+	Username string `json:"username" binding:"required"`
+}

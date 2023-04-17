@@ -22,6 +22,7 @@ type userStorage interface {
 	EditById(ctx context.Context, id int, req map[string]string) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
+	EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error)
 }
 
 type userService struct {
@@ -152,4 +153,8 @@ func (s *userService) EditNameById(ctx context.Context, id int, name string) (en
 
 func (s *userService) EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error) {
 	return s.storage.EditBirthdayById(ctx, id, birthday)
+}
+
+func (s *userService) EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error) {
+	return s.storage.EditUsernameById(ctx, id, username)
 }
