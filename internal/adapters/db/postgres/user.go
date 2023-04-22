@@ -41,20 +41,21 @@ func (s *userStorage) GetUserByID(ctx context.Context, id int) (entity.User, err
 	return user, nil
 }
 
-func (s *userStorage) GetByUsername(ctx context.Context, username string) (entity.UserResponse, error) {
-	user := entity.UserResponse{}
+func (s *userStorage) GetByUsername(ctx context.Context, username string) (entity.User, error) {
+	user := entity.User{}
 	err := s.db.QueryRow(ctx, fmt.Sprintf(`
-        SELECT username, name, birthday, email, phone, created_at
+        SELECT username, name, birthday, email, phone, created_at, id
         FROM %s
         WHERE username = $1
     `, usersTable), username).Scan(
 		&user.Username, &user.Name, &user.Birthday,
-		&user.Email, &user.Phone, &user.CreatedAt)
+		&user.Email, &user.Phone, &user.CreatedAt, &user.Id)
+
 	if errors.Is(err, pgx.ErrNoRows) {
-		return entity.UserResponse{}, e.ErrIdNotFound
+		return entity.User{}, e.ErrIdNotFound
 	}
 	if err != nil {
-		return entity.UserResponse{}, err
+		return entity.User{}, err
 	}
 
 	return user, nil

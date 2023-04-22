@@ -22,7 +22,7 @@ type service interface {
 type userService interface {
 	CreateUser(ctx context.Context, dto user_usecase.CreateUserDTO) (int, error)
 	GetUserByID(ctx context.Context, id int) (entity.User, error)
-	GetByCredentials(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.User, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
 	GetByRefreshToken(ctx context.Context, refreshToken string) (entity.User, error)
 }
 
@@ -74,8 +74,13 @@ func (u *authUsecase) SignUp(ctx context.Context, dto user_usecase.CreateUserDTO
 
 func (u *authUsecase) SignIn(ctx context.Context, dto user_usecase.GetByCredentialsDTO) (entity.Auth, error) {
 	response := entity.Auth{}
-	user, err := u.userService.GetByCredentials(ctx, dto)
+
+	user, err := u.userService.GetByUsername(ctx, dto.Username)
 	if err != nil {
+		return response, err
+	}
+
+	if err := u.service.CheckPassword(ctx, user.Id, dto.Password); err != nil {
 		return response, err
 	}
 

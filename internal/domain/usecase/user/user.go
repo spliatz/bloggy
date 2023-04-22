@@ -8,7 +8,7 @@ import (
 
 type service interface {
 	GetUserByID(ctx context.Context, id int) (entity.User, error)
-	GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
 	EditById(ctx context.Context, id int, i user_dto.EditUserDTO) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error)
@@ -42,7 +42,7 @@ func (u *userUsecase) GetById(ctx context.Context, id int) (entity.UserResponse,
 	}, err
 }
 
-func (u *userUsecase) GetByUsername(ctx context.Context, username string) (entity.UserResponse, error) {
+func (u *userUsecase) GetByUsername(ctx context.Context, username string) (entity.User, error) {
 	return u.service.GetByUsername(ctx, username)
 }
 

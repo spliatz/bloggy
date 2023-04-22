@@ -720,6 +720,10 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "EditEMail",
                 "operationId": "edit-user-email",
                 "parameters": [
                     {
@@ -897,6 +901,10 @@ const docTemplate = `{
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "EditPhone",
                 "operationId": "edit-user-phone",
                 "parameters": [
                     {

@@ -18,7 +18,7 @@ type authMiddleware interface {
 
 type userUsecase interface {
 	GetById(ctx context.Context, id int) (entity.UserResponse, error)
-	GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
 	EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, dto user_dto.EditNameDTO) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, dto user_dto.EditBirthdayDTO) (entity.UserResponse, error)

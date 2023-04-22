@@ -727,6 +727,9 @@ paths:
             $ref: '#/definitions/response.ErrorResponse'
       security:
       - ApiKeyAuth: []
+      summary: EditEMail
+      tags:
+      - user
   /user/my:
     get:
       consumes:
@@ -840,6 +843,9 @@ paths:
             $ref: '#/definitions/response.ErrorResponse'
       security:
       - ApiKeyAuth: []
+      summary: EditPhone
+      tags:
+      - user
   /user/username:
     patch:
       consumes:

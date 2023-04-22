@@ -713,6 +713,10 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "EditEMail",
                 "operationId": "edit-user-email",
                 "parameters": [
                     {
@@ -890,6 +894,10 @@
                 "produces": [
                     "application/json"
                 ],
+                "tags": [
+                    "user"
+                ],
+                "summary": "EditPhone",
                 "operationId": "edit-user-phone",
                 "parameters": [
                     {

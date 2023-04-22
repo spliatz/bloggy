@@ -15,9 +15,8 @@ import (
 
 type userStorage interface {
 	GetUserByID(ctx context.Context, id int) (entity.User, error)
-	GetByUsername(ctx context.Context, username string) (entity.UserResponse, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
 	CreateUser(ctx context.Context, user entity.User) (int, error)
-	GetUserByUserNameAndPassword(ctx context.Context, username, password string) (entity.User, error)
 	GetByRefreshToken(ctx context.Context, refreshToken string) (entity.User, error)
 	EditById(ctx context.Context, id int, req map[string]string) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error)
@@ -40,7 +39,7 @@ func (s *userService) GetUserByID(ctx context.Context, id int) (entity.User, err
 	return s.storage.GetUserByID(ctx, id)
 }
 
-func (s *userService) GetByUsername(ctx context.Context, username string) (entity.UserResponse, error) {
+func (s *userService) GetByUsername(ctx context.Context, username string) (entity.User, error) {
 	return s.storage.GetByUsername(ctx, username)
 }
 
@@ -95,15 +94,6 @@ func (s *userService) CreateUser(ctx context.Context, dto user_dto.CreateUserDTO
 	}
 
 	return s.storage.CreateUser(ctx, u)
-}
-
-func (s *userService) GetByCredentials(ctx context.Context, dto user_dto.GetByCredentialsDTO) (entity.User, error) {
-	passHash, err := s.hasher.Hash(dto.Password)
-	if err != nil {
-		return entity.User{}, err
-	}
-
-	return s.storage.GetUserByUserNameAndPassword(ctx, dto.Username, passHash)
 }
 
 func (s *userService) GetByRefreshToken(ctx context.Context, refreshToken string) (entity.User, error) {
