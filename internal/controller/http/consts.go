@@ -1,5 +1,7 @@
 package http
 
-var paramId = "id"
-var fieldUserId = "user_id"
-var paramUsername = "username"
+const paramId = "id"
+const fieldUserId = "user_id"
+const paramUsername = "username"
+const refreshTokenCookiesName = "refresh_token"
+const monthInSeconds = 60 * 60 * 24 * 30

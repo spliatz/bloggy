@@ -2,9 +2,8 @@ package http
 
 import (
 	"context"
-	"net/http"
-
 	"github.com/gin-gonic/gin"
+	"net/http"
 
 	"github.com/spliatz/bloggy-backend/internal/controller/http/response"
 	"github.com/spliatz/bloggy-backend/internal/domain/entity"
@@ -69,7 +68,8 @@ func (h *authHandler) signUp(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.SetCookie(refreshTokenCookiesName, res.Refresh, monthInSeconds, "/", "localhost", false, true)
+	c.JSON(http.StatusCreated, response.TokenResponse{Access: res.Access})
 }
 
 // @Summary SignIn
@@ -87,7 +87,7 @@ func (h *authHandler) signUp(c *gin.Context) {
 func (h *authHandler) signIn(c *gin.Context) {
 	dto := user_dto.GetByCredentialsDTO{}
 	if err := c.BindJSON(&dto); err != nil {
-		response.ResponseWithError(c, errors.EtoHe(err))
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
 		return
 	}
 
@@ -97,7 +97,8 @@ func (h *authHandler) signIn(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.SetCookie(refreshTokenCookiesName, res.Refresh, monthInSeconds, "/", "localhost", false, true)
+	c.JSON(http.StatusCreated, response.TokenResponse{Access: res.Access})
 }
 
 // @Summary Refresh
@@ -106,18 +107,18 @@ func (h *authHandler) signIn(c *gin.Context) {
 // @ID get-new-access-and-refresh-token
 // @Accept json
 // @Produce json
-// @Param input body dto.RefreshDTO true "refresh token"
 // @Success 200 {object} response.TokenResponse
 // @Failure 400,403,404 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/refresh [post]
 func (h *authHandler) refresh(c *gin.Context) {
-	dto := auth_dto.RefreshDTO{}
-	if err := c.BindJSON(&dto); err != nil {
-		response.ResponseWithError(c, errors.EtoHe(err))
-		return
+	token, err := c.Cookie(refreshTokenCookiesName)
+	if err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
 	}
+	
+	dto := auth_dto.RefreshDTO{RefreshToken: token}
 
 	res, err := h.authUsecase.Refresh(c.Request.Context(), dto)
 	if err != nil {
@@ -125,7 +126,8 @@ func (h *authHandler) refresh(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusCreated, res)
+	c.SetCookie(refreshTokenCookiesName, res.Refresh, monthInSeconds, "/", "localhost", false, true)
+	c.JSON(http.StatusCreated, response.TokenResponse{Access: res.Access})
 }
 
 // @Summary Logout
@@ -134,24 +136,25 @@ func (h *authHandler) refresh(c *gin.Context) {
 // @ID logout
 // @Accept json
 // @Produce json
-// @Param input body dto.LogoutDTO true "refresh token"
 // @Success 200
 // @Failure 400,403,404 {object} response.ErrorResponse
 // @Failure 500 {object} response.ErrorResponse
 // @Failure default {object} response.ErrorResponse
 // @Router /auth/logout [delete]
 func (h *authHandler) logout(c *gin.Context) {
-	dto := auth_dto.LogoutDTO{}
-	if err := c.BindJSON(&dto); err != nil {
-		response.ResponseWithError(c, errors.EtoHe(err))
-		return
+	token, err := c.Cookie(refreshTokenCookiesName)
+	if err != nil {
+		response.ResponseWithError(c, errors.NewHTTPError(http.StatusBadRequest, err))
 	}
+
+	dto := auth_dto.LogoutDTO{RefreshToken: token}
 
 	if err := h.authUsecase.Logout(c.Request.Context(), dto); err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
 	}
 
+	c.SetCookie(refreshTokenCookiesName, "", -1, "/", "localhost", false, true)
 	c.Status(http.StatusOK)
 }
 

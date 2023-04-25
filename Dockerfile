@@ -9,11 +9,11 @@ COPY go.sum .
 RUN apk add make
 COPY Makefile .
 
-RUN make deps
+RUN make -B deps
 COPY . .
 RUN go install github.com/swaggo/swag/cmd/swag@latest
 RUN rm -rf docs
-RUN make docs
+RUN make -B docs
 RUN go build -o bloggy_backend cmd/app/main.go
 
 # Deploy
