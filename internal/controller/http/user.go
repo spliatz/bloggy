@@ -18,14 +18,14 @@ type authMiddleware interface {
 
 type userUsecase interface {
 	GetById(ctx context.Context, id int) (entity.UserResponse, error)
-	GetByUsername(ctx context.Context, username string) (entity.User, error)
+	GetByUsername(ctx context.Context, dto user_dto.GetByUsernameDTO) (entity.User, error)
 	EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error)
 	EditNameById(ctx context.Context, id int, dto user_dto.EditNameDTO) (entity.UserResponse, error)
 	EditBirthdayById(ctx context.Context, id int, dto user_dto.EditBirthdayDTO) (entity.UserResponse, error)
 	EditUsernameById(ctx context.Context, id int, dto user_dto.EditUsernameDTO) (entity.UserResponse, error)
 	EditEmailById(ctx context.Context, id int, dto user_dto.EditEmailDTO) (entity.UserResponse, error)
 	EditPhoneById(ctx context.Context, id int, dto user_dto.EditPhoneDTO) (entity.UserResponse, error)
-	GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error)
+	GetAllByUsername(ctx context.Context, dto user_dto.GetAllByUsernameDTO) (posts []entity.Post, err error)
 }
 
 type userHandler struct {
@@ -98,7 +98,8 @@ func (h *userHandler) getMy(c *gin.Context) {
 // @Router /user/{username} [get]
 func (h *userHandler) getByUsername(c *gin.Context) {
 	username := c.Param(paramUsername)
-	user, err := h.userUsecase.GetByUsername(c.Request.Context(), username)
+	dto := user_dto.GetByUsernameDTO{Username: username}
+	user, err := h.userUsecase.GetByUsername(c.Request.Context(), dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -343,7 +344,8 @@ func (h *userHandler) editBirthdayById(c *gin.Context) {
 // @Router /user/{username}/posts [get]
 func (h *userHandler) getAllByUsername(c *gin.Context) {
 	username := c.Param(paramUsername)
-	posts, err := h.userUsecase.GetAllByUsername(c.Request.Context(), username)
+	dto := user_dto.GetAllByUsernameDTO{Username: username}
+	posts, err := h.userUsecase.GetAllByUsername(c.Request.Context(), dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return

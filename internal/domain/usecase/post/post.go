@@ -35,12 +35,12 @@ func (u *postUsecase) Create(ctx context.Context, dto dto.CreatePostDTO, userId 
 	return u.postService.Create(ctx, post)
 }
 
-func (u *postUsecase) GetById(ctx context.Context, id int) (entity.Post, error) {
-	return u.postService.GetById(ctx, id)
+func (u *postUsecase) GetById(ctx context.Context, dto dto.GetById) (entity.Post, error) {
+	return u.postService.GetById(ctx, dto.Id)
 }
 
-func (u *postUsecase) DeleteById(ctx context.Context, id int, userId int) error {
-	if ok, err := u.IsAuthor(ctx, id, userId); err != nil || !ok {
+func (u *postUsecase) DeleteById(ctx context.Context, dto dto.DeleteById) error {
+	if ok, err := u.IsAuthor(ctx, dto.Id, dto.AuthorId); err != nil || !ok {
 		if err != nil {
 			return err
 		}
@@ -49,7 +49,7 @@ func (u *postUsecase) DeleteById(ctx context.Context, id int, userId int) error 
 		}
 	}
 
-	if err := u.postService.DeleteById(ctx, id); err != nil {
+	if err := u.postService.DeleteById(ctx, dto.Id); err != nil {
 		return err
 	}
 

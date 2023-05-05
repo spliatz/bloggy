@@ -15,8 +15,8 @@ import (
 
 type postUsecase interface {
 	Create(ctx context.Context, dto post_dto.CreatePostDTO, userId int) (int, error)
-	GetById(ctx context.Context, id int) (entity.Post, error)
-	DeleteById(ctx context.Context, id int, userId int) error
+	GetById(ctx context.Context, id post_dto.GetById) (entity.Post, error)
+	DeleteById(ctx context.Context, id post_dto.DeleteById) error
 }
 
 type postHandler struct {
@@ -98,7 +98,9 @@ func (h *postHandler) getById(c *gin.Context) {
 		return
 	}
 
-	post, err := h.postUsecase.GetById(c.Request.Context(), postId)
+	dto := post_dto.GetById{Id: postId}
+
+	post, err := h.postUsecase.GetById(c.Request.Context(), dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return
@@ -135,7 +137,12 @@ func (h *postHandler) deleteById(c *gin.Context) {
 		return
 	}
 
-	err = h.postUsecase.DeleteById(c.Request.Context(), postId, userId)
+	dto := post_dto.DeleteById{
+		Id:       postId,
+		AuthorId: userId,
+	}
+
+	err = h.postUsecase.DeleteById(c.Request.Context(), dto)
 	if err != nil {
 		response.ResponseWithError(c, errors.EtoHe(err))
 		return

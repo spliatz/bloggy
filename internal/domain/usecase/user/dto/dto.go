@@ -42,3 +42,11 @@ type EditEmailDTO struct {
 type EditPhoneDTO struct {
 	Phone string `json:"phone" binding:"required"`
 }
+
+type GetByUsernameDTO struct {
+	Username string `json:"username" binding:"required"`
+}
+
+type GetAllByUsernameDTO struct {
+	Username string `json:"username" binding:"required"`
+}

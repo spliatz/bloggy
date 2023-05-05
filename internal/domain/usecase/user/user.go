@@ -42,12 +42,12 @@ func (u *userUsecase) GetById(ctx context.Context, id int) (entity.UserResponse,
 	}, err
 }
 
-func (u *userUsecase) GetByUsername(ctx context.Context, username string) (entity.User, error) {
-	return u.service.GetByUsername(ctx, username)
+func (u *userUsecase) GetByUsername(ctx context.Context, dto user_dto.GetByUsernameDTO) (entity.User, error) {
+	return u.service.GetByUsername(ctx, dto.Username)
 }
 
-func (u *userUsecase) GetAllByUsername(ctx context.Context, username string) (posts []entity.Post, err error) {
-	return u.postService.GetAllByUsername(ctx, username)
+func (u *userUsecase) GetAllByUsername(ctx context.Context, dto user_dto.GetAllByUsernameDTO) (posts []entity.Post, err error) {
+	return u.postService.GetAllByUsername(ctx, dto.Username)
 }
 
 func (u *userUsecase) EditById(ctx context.Context, id int, dto user_dto.EditUserDTO) (entity.UserResponse, error) {
