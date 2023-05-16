@@ -312,3 +312,25 @@ func (s *userStorage) EditPhoneById(ctx context.Context, id int, phone string) (
 
 	return user, nil
 }
+
+func (s *userStorage) GetAll(ctx context.Context) ([]entity.User, error) {
+	rows, err := s.db.Query(ctx, fmt.Sprintf(`
+		SELECT id, username, name, email, phone, birthday, created_at FROM %s
+	`, usersTable))
+
+	if err != nil {
+		return nil, err
+	}
+
+	users := make([]entity.User, 0)
+	for rows.Next() {
+		var user entity.User
+		err = rows.Scan(&user.Id, &user.Username, &user.Name, &user.Email, &user.Phone, &user.Birthday, &user.CreatedAt)
+		if err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	return users, nil
+}

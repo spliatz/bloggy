@@ -32,18 +32,20 @@ func NewUserUsecase(service service, postService postService) *userUsecase {
 
 func (u *userUsecase) GetById(ctx context.Context, id int) (entity.UserResponse, error) {
 	user, err := u.service.GetUserByID(ctx, id)
-	return entity.UserResponse{
-		Username:  user.Username,
-		Name:      user.Name,
-		Birthday:  user.Birthday,
-		Email:     user.Email,
-		Phone:     user.Phone,
-		CreatedAt: user.CreatedAt,
-	}, err
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	return entity.UserToUserResponse(user), nil
 }
 
-func (u *userUsecase) GetByUsername(ctx context.Context, dto user_dto.GetByUsernameDTO) (entity.User, error) {
-	return u.service.GetByUsername(ctx, dto.Username)
+func (u *userUsecase) GetByUsername(ctx context.Context, dto user_dto.GetByUsernameDTO) (entity.UserResponse, error) {
+	user, err := u.service.GetByUsername(ctx, dto.Username)
+	if err != nil {
+		return entity.UserResponse{}, err
+	}
+
+	return entity.UserToUserResponse(user), nil
 }
 
 func (u *userUsecase) GetAllByUsername(ctx context.Context, dto user_dto.GetAllByUsernameDTO) (posts []entity.Post, err error) {

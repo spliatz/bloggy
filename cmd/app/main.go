@@ -1,12 +1,13 @@
 package main
 
 import (
-	"github.com/gin-contrib/cors"
 	"os"
 	"strconv"
 
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
+	"github.com/spliatz/bloggy-backend/internal/adapters/cache"
 
 	_ "github.com/jackc/pgx/v5/pgtype"
 
@@ -35,7 +36,6 @@ import (
 // @in header
 // @name Authorization
 func main() {
-
 	dbPort, err := strconv.Atoi(os.Getenv("POSTGRES_LOCAL_PORT"))
 	if dbPort > 1<<16 || dbPort < 1 || err != nil {
 		logrus.Fatal("Подключение к базе данных не удалось: некорректный порт")
@@ -80,9 +80,12 @@ func main() {
 	authStorage := postgres.NewAuthStorage(db)
 	postStorage := postgres.NewPostStorage(db)
 
+	// cache
+	userCache := cache.NewUserCache(userStorage).Init()
+
 	// services
 	authService := service.NewAuthService(authStorage, tManager, hasher)
-	userService := service.NewUserService(userStorage, hasher)
+	userService := service.NewUserService(userStorage, hasher, userCache)
 	postService := service.NewPostService(postStorage)
 
 	// usecases
