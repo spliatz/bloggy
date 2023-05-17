@@ -156,27 +156,68 @@ func (s *userService) EditById(ctx context.Context, id int, i user_dto.EditUserD
 }
 
 func (s *userService) EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error) {
-	return s.storage.EditNameById(ctx, id, name)
+  ur, err := s.storage.EditNameById(ctx, id, name)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error) {
-	return s.storage.EditBirthdayById(ctx, id, birthday)
+	ur, err := s.storage.EditBirthdayById(ctx, id, birthday)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error) {
-	return s.storage.EditUsernameById(ctx, id, username)
+	ur, err := s.storage.EditUsernameById(ctx, id, username)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error) {
 	if err := utils.CheckEmail(email); err != nil {
 		return entity.UserResponse{}, err
 	}
-	return s.storage.EditEmailById(ctx, id, email)
+	ur, err := s.storage.EditEmailById(ctx, id, email)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error) {
 	if err := utils.CheckPhone(phone); err != nil {
 		return entity.UserResponse{}, err
 	}
-	return s.storage.EditPhoneById(ctx, id, phone)
+	
+  ur, err := s.storage.EditPhoneById(ctx, id, phone)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
