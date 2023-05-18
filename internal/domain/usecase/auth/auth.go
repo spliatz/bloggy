@@ -47,12 +47,7 @@ func (u *authUsecase) SignUp(ctx context.Context, dto user_usecase.CreateUserDTO
 		return response, err
 	}
 
-	user, err := u.GetUserByID(ctx, newUserID)
-	if err != nil {
-		return response, err
-	}
-
-	response.Access, err = u.GenerateAccessToken(ctx, user.Id)
+	response.Access, err = u.GenerateAccessToken(ctx, newUserID)
 	if err != nil {
 		return response, err
 	}
@@ -67,7 +62,7 @@ func (u *authUsecase) SignUp(ctx context.Context, dto user_usecase.CreateUserDTO
 		ExpiresAt:    time.Now().Add(time.Hour * 720), // 30 days
 	}
 
-	err = u.SetSession(ctx, user.Id, session)
+	err = u.SetSession(ctx, newUserID, session)
 
 	return response, err
 }

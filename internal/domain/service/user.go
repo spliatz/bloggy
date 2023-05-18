@@ -26,21 +26,28 @@ type userStorage interface {
 	EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error)
 }
 
+type userCache interface {
+	GetById(ctx context.Context, id int) (entity.User, error)
+	GetByUsername(ctx context.Context, username string) (entity.User, error)
+	Set(ctx context.Context, user entity.User)
+}
+
 type userService struct {
 	storage userStorage
 	hasher  hash.PasswordHasher
+	cache   userCache
 }
 
-func NewUserService(storage userStorage, hasher hash.PasswordHasher) *userService {
-	return &userService{storage: storage, hasher: hasher}
+func NewUserService(storage userStorage, hasher hash.PasswordHasher, cache userCache) *userService {
+	return &userService{storage: storage, hasher: hasher, cache: cache}
 }
 
 func (s *userService) GetUserByID(ctx context.Context, id int) (entity.User, error) {
-	return s.storage.GetUserByID(ctx, id)
+	return s.cache.GetById(ctx, id)
 }
 
 func (s *userService) GetByUsername(ctx context.Context, username string) (entity.User, error) {
-	return s.storage.GetByUsername(ctx, username)
+	return s.cache.GetByUsername(ctx, username)
 }
 
 func (s *userService) CreateUser(ctx context.Context, dto user_dto.CreateUserDTO) (int, error) {
@@ -93,7 +100,13 @@ func (s *userService) CreateUser(ctx context.Context, dto user_dto.CreateUserDTO
 		CreatedAt: time.Now(),
 	}
 
-	return s.storage.CreateUser(ctx, u)
+	if id, err := s.storage.CreateUser(ctx, u); err != nil {
+		return -1, err
+	} else {
+		u.Id = id
+		s.cache.Set(ctx, u)
+		return id, nil
+	}
 }
 
 func (s *userService) GetByRefreshToken(ctx context.Context, refreshToken string) (entity.User, error) {
@@ -137,32 +150,74 @@ func (s *userService) EditById(ctx context.Context, id int, i user_dto.EditUserD
 	if err != nil {
 		return entity.UserResponse{}, err
 	}
-
+  
+  s.cache.Set(ctx, entity.UserResponseToUser(user, id))
 	return user, nil
 }
 
 func (s *userService) EditNameById(ctx context.Context, id int, name string) (entity.UserResponse, error) {
-	return s.storage.EditNameById(ctx, id, name)
+  ur, err := s.storage.EditNameById(ctx, id, name)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditBirthdayById(ctx context.Context, id int, birthday string) (entity.UserResponse, error) {
-	return s.storage.EditBirthdayById(ctx, id, birthday)
+	ur, err := s.storage.EditBirthdayById(ctx, id, birthday)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditUsernameById(ctx context.Context, id int, username string) (entity.UserResponse, error) {
-	return s.storage.EditUsernameById(ctx, id, username)
+	ur, err := s.storage.EditUsernameById(ctx, id, username)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditEmailById(ctx context.Context, id int, email string) (entity.UserResponse, error) {
 	if err := utils.CheckEmail(email); err != nil {
 		return entity.UserResponse{}, err
 	}
-	return s.storage.EditEmailById(ctx, id, email)
+	ur, err := s.storage.EditEmailById(ctx, id, email)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
 
 func (s *userService) EditPhoneById(ctx context.Context, id int, phone string) (entity.UserResponse, error) {
 	if err := utils.CheckPhone(phone); err != nil {
 		return entity.UserResponse{}, err
 	}
-	return s.storage.EditPhoneById(ctx, id, phone)
+	
+  ur, err := s.storage.EditPhoneById(ctx, id, phone)
+  if err != nil {
+    return entity.UserResponse{}, err
+  }
+
+  u := entity.UserResponseToUser(ur, id)
+  s.cache.Set(ctx, u)
+
+  return ur, nil
 }
