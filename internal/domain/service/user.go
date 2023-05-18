@@ -44,7 +44,6 @@ func NewUserService(storage userStorage, hasher hash.PasswordHasher, cache userC
 
 func (s *userService) GetUserByID(ctx context.Context, id int) (entity.User, error) {
 	return s.cache.GetById(ctx, id)
-	// return s.cache.GetById(ctx, id)
 }
 
 func (s *userService) GetByUsername(ctx context.Context, username string) (entity.User, error) {
