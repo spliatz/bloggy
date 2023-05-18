@@ -151,7 +151,8 @@ func (s *userService) EditById(ctx context.Context, id int, i user_dto.EditUserD
 	if err != nil {
 		return entity.UserResponse{}, err
 	}
-
+  
+  s.cache.Set(ctx, entity.UserResponseToUser(user, id))
 	return user, nil
 }
 
